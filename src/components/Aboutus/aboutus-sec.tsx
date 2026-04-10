@@ -24,6 +24,11 @@ const Experience3D: React.FC = () => {
   const scrollTargetRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Refs for text overlays
+  const startTextRef = useRef<HTMLDivElement>(null);
+  const centerTextRef = useRef<HTMLDivElement>(null);
+  const endTextRef = useRef<HTMLDivElement>(null);
+
   // Three.js refs
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -38,7 +43,6 @@ const Experience3D: React.FC = () => {
   const animationIdRef = useRef<number>();
   const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
 
-  // Smooth camera interpolation state
   const cameraTargetPercent = useRef(0);
   const cameraCurrentPercent = useRef(0);
   const cameraRotationProxy = useRef({ x: 3.14159, y: 0 });
@@ -51,7 +55,7 @@ const Experience3D: React.FC = () => {
     const wh = window.innerHeight;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog( 0x0b5330, 0, 100);
+    scene.fog = new THREE.Fog(0x0b5330, 0, 100);
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(45, ww / wh, 0.001, 200);
@@ -162,7 +166,7 @@ const Experience3D: React.FC = () => {
     scene.add(sys1, sys2, sys3);
     particleSystemsRef.current = [sys1, sys2, sys3];
 
-    // --- Camera Update Function (called every frame with current percentage) ---
+    // --- Camera Update Function ---
     const updateCameraPercentage = (percentage: number) => {
       if (!pathRef.current || !cameraGroupRef.current || !lightRef.current) return;
       const p1 = pathRef.current.getPointAt(percentage);
@@ -172,29 +176,50 @@ const Experience3D: React.FC = () => {
       lightRef.current.position.set(p2.x, p2.y, p2.z);
     };
 
-    // --- ScrollTrigger: immediately updates the target percentage (no smoothing here) ---
+    // --- Update text opacity based on scroll progress ---
+    const updateTextOpacity = (progress: number) => {
+      const p = progress / 0.96; // normalize to 0..1
+
+      // Start text: visible 0→0.15, fades out by 0.25
+      const startOpacity = p < 0.15 ? 1 : Math.max(0, 1 - (p - 0.15) / 0.1);
+      // Center text: fades in 0.4→0.5, stays 1 until 0.7, fades out 0.7→0.8
+      let centerOpacity = 0;
+      if (p >= 0.4 && p < 0.5) centerOpacity = (p - 0.4) / 0.1;
+      else if (p >= 0.5 && p < 0.7) centerOpacity = 1;
+      else if (p >= 0.7 && p < 0.8) centerOpacity = 1 - (p - 0.7) / 0.1;
+      // End text: fades in 0.8→0.9, stays 1 to end
+      let endOpacity = 0;
+      if (p >= 0.8 && p < 0.9) endOpacity = (p - 0.8) / 0.1;
+      else if (p >= 0.9) endOpacity = 1;
+
+      if (startTextRef.current) startTextRef.current.style.opacity = startOpacity.toString();
+      if (centerTextRef.current) centerTextRef.current.style.opacity = centerOpacity.toString();
+      if (endTextRef.current) endTextRef.current.style.opacity = endOpacity.toString();
+    };
+
+    // --- ScrollTrigger: update target percentage and text opacity ---
     scrollTriggerRef.current = ScrollTrigger.create({
       trigger: scrollTargetRef.current,
       start: 'top top',
       end: 'bottom 100%',
-      scrub: false,           // we don't want GSAP to animate; we'll handle it ourselves
+      scrub: false,
       onUpdate: (self) => {
-        // self.progress goes from 0 to 1 as we scroll
-        cameraTargetPercent.current = self.progress * 0.96;
+        const rawProgress = self.progress * 0.96;
+        cameraTargetPercent.current = rawProgress;
+        updateTextOpacity(rawProgress);
       },
     });
 
-    // Also update on scroll events to ensure instant target change (ScrollTrigger onUpdate is enough)
-    // But we'll also add a direct scroll listener for extra responsiveness
     const handleScroll = () => {
       if (scrollTriggerRef.current) {
-        const progress = scrollTriggerRef.current.progress;
-        cameraTargetPercent.current = progress * 0.96;
+        const progress = scrollTriggerRef.current.progress * 0.96;
+        cameraTargetPercent.current = progress;
+        updateTextOpacity(progress);
       }
     };
     window.addEventListener('scroll', handleScroll);
 
-    // --- Mouse Move Handler (smoothing as original) ---
+    // --- Mouse Move Handler ---
     const handleMouseMove = (evt: MouseEvent) => {
       cameraRotationProxy.current.x = Mathutils.map(evt.clientX, 0, window.innerWidth, 3.24, 3.04);
       cameraRotationProxy.current.y = Mathutils.map(evt.clientY, 0, window.innerHeight, -0.1, 0.1);
@@ -214,22 +239,16 @@ const Experience3D: React.FC = () => {
     };
     window.addEventListener('resize', handleResize);
 
-    // --- Animation Loop (smooth camera interpolation) ---
+    // --- Animation Loop ---
     const animate = () => {
-      // Smoothly interpolate current percentage towards target (adjust speed for smoothness)
-      // The 0.08 factor gives a gentle follow effect – increase for faster response, decrease for smoother lag
       cameraCurrentPercent.current += (cameraTargetPercent.current - cameraCurrentPercent.current) * 0.08;
-      
-      // Update camera position using the interpolated value
       updateCameraPercentage(cameraCurrentPercent.current);
 
-      // Mouse rotation smoothing (as original)
       if (cameraRef.current) {
         cameraRef.current.rotation.y += (cameraRotationProxy.current.x - cameraRef.current.rotation.y) / 15;
         cameraRef.current.rotation.x += (cameraRotationProxy.current.y - cameraRef.current.rotation.x) / 15;
       }
 
-      // Rotate particles for subtle motion
       particleSystemsRef.current.forEach((sys, idx) => {
         if (idx === 0) sys.rotation.y += 0.00002;
         if (idx === 1) sys.rotation.x += 0.00005;
@@ -268,10 +287,52 @@ const Experience3D: React.FC = () => {
     };
   }, []);
 
+  // Shared style for all overlay texts – no background, clean font
+  const textStyle: React.CSSProperties = {
+    position: 'fixed',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    color: '#ffffff',
+    fontFamily: "'Montserrat', 'Segoe UI', system-ui, sans-serif",
+    fontSize: 'clamp(2rem, 8vw, 4rem)',
+    fontWeight: 600,
+    textAlign: 'center',
+    zIndex: 20,
+    pointerEvents: 'none',
+    textShadow: '0 0 20px rgba(0,0,0,0.7), 0 0 40px rgba(0,0,0,0.5)',
+    letterSpacing: '0.05em',
+    lineHeight: 1.2,
+    whiteSpace: 'nowrap',
+    opacity: 0,
+    transition: 'opacity 0.15s ease-out',
+  };
+
   return (
     <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100vh' }}>
+      {/* Import Google Font */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap');
+        body {
+          margin: 0;
+          overflow-x: hidden;
+        }
+      `}</style>
+
       <canvas ref={canvasRef} className="experience" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh', zIndex: 2 }} />
       <div ref={scrollTargetRef} className="scrollTarget" style={{ position: 'absolute', height: '1000vh', width: '100px', top: 0, zIndex: 0 }} />
+
+      {/* Three sequential text overlays – Yuni narrative */}
+      <div ref={startTextRef} style={{ ...textStyle, top: '20%' }}>
+        AWAKEN THE YOUTH
+      </div>
+      <div ref={centerTextRef} style={{ ...textStyle, top: '50%', transform: 'translate(-50%, -50%)' }}>
+        YUNI PAKISTAN
+      </div>
+      <div ref={endTextRef} style={{ ...textStyle, bottom: '20%', top: 'auto', transform: 'translateX(-50%)' }}>
+        BUILD THE FUTURE
+      </div>
+
+      {/* Vignette effect for depth */}
       <div className="vignette-radial" style={{ position: 'fixed', zIndex: 11, top: 0, left: 0, height: '100vh', width: '100%', pointerEvents: 'none' }}>
         <style>{`
           .vignette-radial:after {
@@ -283,12 +344,6 @@ const Experience3D: React.FC = () => {
           }
         `}</style>
       </div>
-      <style>{`
-        body {
-          margin: 0;
-          overflow-x: hidden;
-        }
-      `}</style>
     </div>
   );
 };
