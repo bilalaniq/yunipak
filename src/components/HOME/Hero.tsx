@@ -1,18 +1,19 @@
+// src/components/HOME/Hero.tsx
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 
 export default function Hero() {
-  const containerRef = useRef(null);
-  const sceneRef = useRef(null);
-  const cameraRef = useRef(null);
-  const rendererRef = useRef(null);
-  const particlesRef = useRef(null);
-  const renderingParentRef = useRef(null);
-  const animationIdRef = useRef(null);
-  const mouseTweenRef = useRef(null);
-  const scaleTweenRef = useRef(null);
-  const rotateTweenRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const particlesRef = useRef<THREE.Points | null>(null);
+  const renderingParentRef = useRef<THREE.Group | null>(null);
+  const animationIdRef = useRef<number | null>(null);
+  const mouseTweenRef = useRef<gsap.core.Tween | null>(null);
+  const scaleTweenRef = useRef<gsap.core.Tween | null>(null);
+  const rotateTweenRef = useRef<gsap.core.Tween | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -70,7 +71,7 @@ export default function Hero() {
 
     scene.add(renderingParent);
 
-    const onMouseMove = (event) => {
+    const onMouseMove = (event: MouseEvent) => {
       if (mouseTweenRef.current) mouseTweenRef.current.kill();
 
       const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
@@ -148,7 +149,12 @@ export default function Hero() {
 
       if (particlesRef.current) {
         particlesRef.current.geometry.dispose();
-        particlesRef.current.material.dispose();
+        const material = particlesRef.current.material;
+        if (Array.isArray(material)) {
+          material.forEach((mat) => mat.dispose());
+        } else {
+          material.dispose();
+        }
       }
     };
   }, []);
@@ -156,7 +162,6 @@ export default function Hero() {
   return (
     <>
       <style>{`
-        /* Global overflow hidden to prevent scrollbars from overflowing elements */
         body {
           margin: 0;
           padding: 0;
@@ -166,8 +171,8 @@ export default function Hero() {
         }
 
         .hero {
-          padding-top: 12rem;    /* increased from 8rem */
-          padding-bottom: 10rem; /* increased from 5rem */
+          padding-top: 12rem;
+          padding-bottom: 10rem;
           padding-left: 1.5rem;
           padding-right: 1.5rem;
           position: relative;
@@ -182,7 +187,7 @@ export default function Hero() {
         .hero-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 4rem; /* increased gap */
+          gap: 4rem;
           align-items: center;
           overflow: visible;
         }
@@ -211,14 +216,14 @@ export default function Hero() {
         }
 
         .hero-title {
-          font-size: 3.5rem; /* slightly larger */
+          font-size: 3.5rem;
           font-weight: 700;
           line-height: 1.2;
         }
 
         @media (min-width: 768px) {
           .hero-title {
-            font-size: 4.5rem; /* larger on desktop */
+            font-size: 4.5rem;
           }
         }
 
@@ -227,7 +232,7 @@ export default function Hero() {
         }
 
         .hero-description {
-          font-size: 1.25rem; /* slightly larger */
+          font-size: 1.25rem;
           color: var(--text-gray);
           line-height: 1.6;
           max-width: 90%;
@@ -243,7 +248,7 @@ export default function Hero() {
         .btn-primary {
           background-color: var(--primary);
           color: var(--primary-dark);
-          padding: 0.875rem 2rem; /* bigger button */
+          padding: 0.875rem 2rem;
           border-radius: 0.5rem;
           font-weight: 600;
           transition: background-color 0.3s ease;
@@ -274,23 +279,21 @@ export default function Hero() {
           background-color: rgba(153, 213, 162, 0.1);
         }
 
-        /* Overflow setup for the visual area */
         .hero-visual {
           position: relative;
           display: flex;
           justify-content: center;
           align-items: center;
           overflow: visible;
-          min-height: 500px; /* increased from 400px */
+          min-height: 500px;
         }
 
-        /* The canvas wrapper becomes an absolute container that overflows its parent */
         .canvas-wrapper {
           position: absolute;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          width: 150%; /* slightly larger overflow */
+          width: 150%;
           height: 150%;
           overflow: visible;
           pointer-events: none;

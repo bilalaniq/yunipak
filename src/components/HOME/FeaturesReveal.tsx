@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+// src/components/HOME/FeaturesReveal.tsx
+import { useEffect } from 'react'; // Removed unused useRef
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 

@@ -1,3 +1,4 @@
+// src/components/HOME/TextEffect.tsx
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -140,7 +141,7 @@ const TextEffect = () => {
           <h1 
             key={index}
             className={`text ${item.link ? 'has-link' : ''}`}
-            ref={el => textRefs.current[index] = el}
+            ref={(el) => { textRefs.current[index] = el; }}
           >
             {item.mainText}
             <span>

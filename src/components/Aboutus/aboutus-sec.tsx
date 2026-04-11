@@ -1,3 +1,4 @@
+// src/components/Aboutus/aboutus-sec.tsx
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -39,7 +40,7 @@ const Experience3D: React.FC = () => {
   const lightRef = useRef<THREE.PointLight | null>(null);
   const particleSystemsRef = useRef<THREE.Points[]>([]);
   const pathRef = useRef<THREE.CatmullRomCurve3 | null>(null);
-  const animationIdRef = useRef<number>();
+  const animationIdRef = useRef<number | null>(null); // Fixed: provide initial value
   const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
 
   const cameraTargetPercent = useRef(0);
@@ -174,7 +175,9 @@ const Experience3D: React.FC = () => {
 
       // Fade out scroll prompt quickly as soon as user scrolls
       if (scrollPromptRef.current) {
-        scrollPromptRef.current.style.opacity = p < 0.05 ? (1 - p / 0.05) : '0';
+        // Fixed: ensure opacity is assigned as string
+        const opacityValue = p < 0.05 ? 1 - p / 0.05 : 0;
+        scrollPromptRef.current.style.opacity = String(opacityValue);
         scrollPromptRef.current.style.pointerEvents = p < 0.05 ? 'auto' : 'none';
       }
 
@@ -192,7 +195,7 @@ const Experience3D: React.FC = () => {
         if (p >= in0 && p < in1) opacity = (p - in0) / (in1 - in0);
         else if (p >= in1 && p < out0) opacity = 1;
         else if (p >= out0 && p < out1) opacity = 1 - (p - out0) / (out1 - out0);
-        el.style.opacity = opacity.toString();
+        el.style.opacity = String(opacity);
         el.style.pointerEvents = 'none';
       });
     };
@@ -381,7 +384,7 @@ const Experience3D: React.FC = () => {
       </div>
 
       {/* Section 1 – Introduction */}
-      <div ref={el => sectionRefs.current[0] = el} style={textContainerStyle}>
+      <div ref={(el) => { sectionRefs.current[0] = el; }} style={textContainerStyle}>
         <h1 style={headingStyle}>Yuni Pakistan</h1>
         <div style={subheadingStyle}>Re‑Building The 21st Century Shaheen 🦅</div>
         <p style={paragraphStyle}>
@@ -395,7 +398,7 @@ const Experience3D: React.FC = () => {
       </div>
 
       {/* Section 2 – Core Ideology */}
-      <div ref={el => sectionRefs.current[1] = el} style={textContainerStyle}>
+      <div ref={(el) => { sectionRefs.current[1] = el; }} style={textContainerStyle}>
         <h2 style={headingStyle}>Our Ideology</h2>
         <p style={paragraphStyle}>
           <span style={strongStyle}>Khudi (Self‑Realization)</span> — Every young Pakistani carries untapped 
@@ -416,7 +419,7 @@ const Experience3D: React.FC = () => {
       </div>
 
       {/* Section 3 – Products Overview */}
-      <div ref={el => sectionRefs.current[2] = el} style={textContainerStyle}>
+      <div ref={(el) => { sectionRefs.current[2] = el; }} style={textContainerStyle}>
         <h2 style={headingStyle}>The Yuni Ecosystem</h2>
         <p style={paragraphStyle}>
           <span style={strongStyle}>Yuni-Buddy</span> (Parwaaz‑e‑Uqabi) — Connectivity, earning opportunities, jobs, and global access.
@@ -431,28 +434,28 @@ const Experience3D: React.FC = () => {
           <span style={strongStyle}>Yuni-Tech & Marketing</span> (Taqat‑e‑Parwaaz) — Boosting digital presence, AI, and e‑commerce enablement.
         </p>
         <p style={paragraphStyle}>
-          <span style={strongStyle}>Business Consultation</span> (Momin‑e‑Sana’at) — Guiding entrepreneurs with faith and action.
+          <span style={strongStyle}>Business Consultation</span> (Momin‑e‑Sana'at) — Guiding entrepreneurs with faith and action.
         </p>
       </div>
 
       {/* Section 4 – Yuni Buddy & Courses Deep Dive */}
-      <div ref={el => sectionRefs.current[3] = el} style={textContainerStyle}>
+      <div ref={(el) => { sectionRefs.current[3] = el; }} style={textContainerStyle}>
         <h2 style={headingStyle}>Yuni-Buddy & Yuni-Courses</h2>
         <p style={paragraphStyle}>
-          <span style={strongStyle}>Parwaaz‑e‑Uqabi</span> — “Sitaron se aage jahan aur bhi hain”<br/>
+          <span style={strongStyle}>Parwaaz‑e‑Uqabi</span> — "Sitaron se aage jahan aur bhi hain"<br/>
           Connectivity across Pakistan, earning opportunities & internships, leadership & community building, global opportunities & study resources.
         </p>
         <p style={paragraphStyle}>
-          <span style={strongStyle}>Umeed‑e‑Sahar</span> — “Khudi ko kar buland itna…”<br/>
+          <span style={strongStyle}>Umeed‑e‑Sahar</span> — "Khudi ko kar buland itna…"<br/>
           Practical, project‑based courses taught by CEOs, COOs, Founders. Portfolio building & job security. No certification without passing final projects. Course + Internship guarantee.
         </p>
       </div>
 
       {/* Section 5 – Tech, Marketing & Coworking */}
-      <div ref={el => sectionRefs.current[4] = el} style={textContainerStyle}>
+      <div ref={(el) => { sectionRefs.current[4] = el; }} style={textContainerStyle}>
         <h2 style={headingStyle}>Taqat‑e‑Parwaaz & Yuni‑Anjuman</h2>
         <p style={paragraphStyle}>
-          <span style={strongStyle}>Yuni-Tech & Marketing</span> — Boosting Pakistan’s digital presence with AI, 
+          <span style={strongStyle}>Yuni-Tech & Marketing</span> — Boosting Pakistan's digital presence with AI, 
           automation, e‑commerce, and global branding. Empowering businesses to soar with tech.
         </p>
         <p style={paragraphStyle}>
@@ -460,7 +463,7 @@ const Experience3D: React.FC = () => {
           and events. Where <em>Shaheens</em> gather to build the future.
         </p>
         <p style={{ ...paragraphStyle, marginTop: '2rem', fontStyle: 'italic' }}>
-          “Yaqeen Muhkam, Amal Paiham, Mohabbat Fateh‑e‑Alam”
+          "Yaqeen Muhkam, Amal Paiham, Mohabbat Fateh‑e‑Alam"
         </p>
       </div>
 
