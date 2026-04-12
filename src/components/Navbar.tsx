@@ -5,17 +5,6 @@ import { compname } from '../constants';
 export default function Navbar() {
   const location = useLocation();
 
-  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
-    // Only apply smooth scroll if we're on the home page
-    if (location.pathname === '/') {
-      e.preventDefault();
-      const section = document.getElementById(sectionId);
-      if (section) {
-        section.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  };
-
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -36,20 +25,18 @@ export default function Navbar() {
           >
             About
           </Link>
-          {/* Services now uses react-router Link to "/services" */}
           <Link
             to="/services"
             className={location.pathname === '/services' ? 'active' : ''}
           >
             Services
           </Link>
-          {/* Contact remains a hash link with smooth scroll (works only on homepage) */}
-          <a
-            href="#contact"
-            onClick={(e) => handleSmoothScroll(e, 'contact')}
+          <Link
+            to="/contact"
+            className={location.pathname === '/contact' ? 'active' : ''}
           >
             Contact
-          </a>
+          </Link>
         </div>
       </div>
 
