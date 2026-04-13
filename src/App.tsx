@@ -14,16 +14,18 @@ import './styles.css';
 function App() {
   const location = useLocation();
 
-  // 🔧 Disable browser's automatic scroll restoration (only once)
+  // Disable browser's automatic scroll restoration
   useLayoutEffect(() => {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
   }, []);
 
-  // 🔧 Scroll to top on every route change
+  // Scroll to top on route change, EXCEPT for the Services page (where ScrollMotionPath lives)
   useLayoutEffect(() => {
-    window.scrollTo(0, 0);
+    if (location.pathname !== '/services') {
+      window.scrollTo(0, 0);
+    }
   }, [location.pathname]);
 
   return (

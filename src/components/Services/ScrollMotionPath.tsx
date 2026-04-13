@@ -9,17 +9,17 @@ const ScrollMotionPath = () => {
   const mainRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<SVGSVGElement>(null);
   const motionPathRef = useRef<SVGPathElement>(null);
-  const boxRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
 
   const createTimeline = useCallback(() => {
-    if (!mainRef.current || !boxRef.current || !motionPathRef.current) return;
+    if (!mainRef.current || !dotRef.current || !motionPathRef.current) return;
 
     ctxRef.current?.revert();
     ScrollTrigger.getAll().forEach(st => st.kill());
 
     const ctx = gsap.context(() => {
-      const box = boxRef.current!;
+      const dot = dotRef.current!;
       const main = mainRef.current!;
       const overlay = overlayRef.current!;
       const motionPath = motionPathRef.current!;
@@ -28,9 +28,9 @@ const ScrollMotionPath = () => {
       if (containers.length === 0) return;
 
       const mainRect = main.getBoundingClientRect();
-      const boxWidth = box.offsetWidth;
-      const boxHeight = box.offsetHeight;
+      const dotSize = dot.offsetWidth;
 
+      // Get center points of all containers
       const points: { x: number; y: number }[] = [];
       containers.forEach((container) => {
         const rect = container.getBoundingClientRect();
@@ -40,15 +40,18 @@ const ScrollMotionPath = () => {
         });
       });
 
+      // Convert to coordinates relative to main container
       const relativePoints = points.map(p => ({
         x: p.x - mainRect.left,
         y: p.y - mainRect.top,
       }));
 
+      // Create smooth path
       const rawPath = MotionPathPlugin.arrayToRawPath(relativePoints, { curviness: 1.2 });
       const pathString = MotionPathPlugin.rawPathToString(rawPath);
       motionPath.setAttribute('d', pathString);
 
+      // Set SVG dimensions
       overlay.setAttribute('width', String(mainRect.width));
       overlay.setAttribute('height', String(mainRect.height));
       overlay.setAttribute('viewBox', `0 0 ${mainRect.width} ${mainRect.height}`);
@@ -60,24 +63,38 @@ const ScrollMotionPath = () => {
         height: mainRect.height,
       });
 
+      // Animate the green line (stroke-dashoffset)
+      const pathLength = motionPath.getTotalLength();
+      motionPath.style.strokeDasharray = pathLength.toString();
+      motionPath.style.strokeDashoffset = pathLength.toString(); // start invisible
+
+      // Start position of the dot
       const startPoint = relativePoints[0];
-      gsap.set(box, {
-        x: startPoint.x - boxWidth / 2,
-        y: startPoint.y - boxHeight / 2,
+      gsap.set(dot, {
+        x: startPoint.x - dotSize / 2,
+        y: startPoint.y - dotSize / 2,
       });
 
+      // Main timeline for dot movement and line drawing
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: containers[0] as HTMLElement,
+          trigger: containers[0],
           start: 'top center',
-          endTrigger: containers[containers.length - 1] as HTMLElement,
+          endTrigger: containers[containers.length - 1],
           end: 'bottom center',
           scrub: 1.2,
           invalidateOnRefresh: true,
+          scroller: window,
+          onUpdate: (self) => {
+            // Draw line exactly up to the current progress
+            const progress = self.progress;
+            const offset = pathLength * (1 - progress);
+            motionPath.style.strokeDashoffset = offset.toString();
+          },
         },
       });
 
-      tl.to(box, {
+      tl.to(dot, {
         duration: 1,
         ease: 'none',
         motionPath: {
@@ -87,24 +104,35 @@ const ScrollMotionPath = () => {
           autoRotate: false,
         },
       });
-
-      ScrollTrigger.refresh();
     }, mainRef);
 
     ctxRef.current = ctx;
+    setTimeout(() => ScrollTrigger.refresh(), 100);
   }, []);
 
   useEffect(() => {
-    const timeout = setTimeout(() => createTimeline(), 100);
-    window.addEventListener('load', createTimeline);
+    const timeoutId = setTimeout(() => {
+      createTimeline();
+    }, 100);
+
+    const handleLoad = () => {
+      ScrollTrigger.refresh();
+      createTimeline();
+    };
+    window.addEventListener('load', handleLoad);
+
     return () => {
-      clearTimeout(timeout);
-      window.removeEventListener('load', createTimeline);
+      clearTimeout(timeoutId);
+      window.removeEventListener('load', handleLoad);
+      ctxRef.current?.revert();
+      ScrollTrigger.getAll().forEach(st => st.kill());
     };
   }, [createTimeline]);
 
   useEffect(() => {
-    const handleResize = () => createTimeline();
+    const handleResize = () => {
+      createTimeline();
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [createTimeline]);
@@ -138,26 +166,35 @@ const ScrollMotionPath = () => {
           top: 0;
           left: 0;
           background: transparent;
-          opacity: 1;
           pointer-events: none;
           z-index: 5;
+        }
+        #motionPath {
+          stroke: #4ade80;
+          stroke-width: 4;
+          fill: none;
+          filter: drop-shadow(0 0 6px #22c55e);
+          transition: stroke-dashoffset 0.05s linear;
         }
         .scroll-motion-root .container {
           background: rgba(255, 255, 255, 0.1);
           position: absolute;
           width: 140px;
           height: 140px;
-          border: 2px dashed rgba(255, 255, 255, 0.2);
-          border-radius: 10px;
+          border: 2px dashed rgba(74, 222, 128, 0.4);
+          border-radius: 16px;
           display: flex;
           justify-content: center;
           align-items: center;
+          backdrop-filter: blur(4px);
+          z-index: 2;
         }
-        .scroll-motion-root .container:after {
-          position: absolute;
-          font-size: 34px;
-          color: rgba(255, 255, 255, 0.3);
-          pointer-events: none;
+        .scroll-motion-root .marker {
+          width: 80px;
+          height: 80px;
+          border-radius: 12px;
+          background: rgba(74, 222, 128, 0.15);
+          border: 1px solid rgba(74, 222, 128, 0.5);
         }
         .scroll-motion-root .initial { left: 70%; top: 7%; }
         .scroll-motion-root .second { left: 10%; top: 20%; }
@@ -165,213 +202,180 @@ const ScrollMotionPath = () => {
         .scroll-motion-root .fourth { left: 20%; top: 45%; }
         .scroll-motion-root .fifth { left: 70%; top: 60%; }
         .scroll-motion-root .sixth { left: 15%; top: 75%; }
-        .scroll-motion-root .marker {
-          width: 100px;
-          height: 100px;
-          border-radius: 10px;
-          background: rgba(255, 255, 255, 0.05);
-        }
-        .scroll-motion-root .box {
-          width: 100px;
-          height: 100px;
-          z-index: 10;
-          border-radius: 10px;
-          background-image: url("https://assets.codepen.io/16327/flair-26.png");
-          background-size: contain;
-          background-repeat: no-repeat;
-          background-color: transparent;
+
+        /* Green dot styling - at the end of the line */
+        .scroll-motion-root .dot {
+          width: 16px;
+          height: 16px;
+          z-index: 20;
+          border-radius: 50%;
+          background: #4ade80;
+          box-shadow: 0 0 12px #22c55e, 0 0 20px rgba(34, 197, 94, 0.8);
           will-change: transform;
           position: absolute;
           top: 0;
           left: 0;
         }
-        .custom-title {
-          position: absolute;
-          top: 2%;
-          left: 5%;
-          color: white;
-          font-size: 4rem;
-          z-index: 20;
-          text-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-        .custom-subtitle {
-          position: absolute;
-          bottom: 10%;
-          right: 5%;
-          color: #ccc;
-          font-size: 1.2rem;
-          text-align: right;
-          z-index: 20;
-          text-shadow: 0 0 10px rgba(0,0,0,0.3);
-        }
-        .custom-milestone {
-          position: absolute;
-          top: 40%;
-          left: 50%;
-          transform: translateX(-50%);
-          color: #efe;
-          font-size: 1.5rem;
-          background: rgba(0,0,0,0.3);
-          padding: 0.5rem 1rem;
-          border-radius: 30px;
-          z-index: 15;
-          backdrop-filter: blur(4px);
-        }
 
-        /* --- Dynamic text block styles — no internal scroll, auto height, wider --- */
+        /* Text blocks - aligned with containers */
         .text-block {
           position: absolute;
-          width: 600px;                /* Fixed width but wider */
-          max-width: 90vw;             /* Prevent overflow on small screens */
+          width: 560px;
+          max-width: 85vw;
           padding: 1.8rem 2rem;
-          background: rgba(20, 30, 25, 0.75);
+          background: rgba(20, 30, 25, 0.85);
           backdrop-filter: blur(12px);
-          border-left: 4px solid #7f9f7f;
-          border-radius: 0 20px 20px 0;
+          border-left: 4px solid #4ade80;
+          border-radius: 0 24px 24px 0;
           color: #efe;
           z-index: 15;
-          box-shadow: 0 16px 32px rgba(0,0,0,0.4);
-          pointer-events: none;
-          display: flex;
-          flex-direction: column;
-          gap: 1.2rem;
-          /* No height restriction — grows with content */
+          box-shadow: 0 16px 32px rgba(0,0,0,0.5);
+          pointer-events: auto;
+          transition: transform 0.2s;
         }
-
+        .text-block:hover {
+          transform: translateX(6px);
+        }
         .text-block-header {
           display: flex;
           align-items: center;
           gap: 1rem;
+          margin-bottom: 1rem;
         }
-
         .text-block-img {
           width: 70px;
           height: 70px;
-          border-radius: 16px;
+          border-radius: 20px;
           object-fit: cover;
-          background: rgba(255,255,255,0.1);
-          flex-shrink: 0;
+          background: #1e2a25;
+          border: 1px solid #4ade8040;
         }
-
         .text-block h3 {
           font-size: 1.8rem;
-          color: #b8d9b8;
+          color: #bef264;
           line-height: 1.2;
         }
-
         .text-block p {
-          font-size: 1.36rem;
-          line-height: 1.7;
-          opacity: 0.95;
-          /* No max-height, no overflow */
-        }
-
-        /* Green bullet points styling */
-        .text-block ul {
-          list-style: none;
-          padding-left: 0;
-          margin: 0.5rem 0;
-        }
-        .text-block li {
           font-size: 1.2rem;
           line-height: 1.6;
-          margin-bottom: 0.6rem;
+          margin-bottom: 1rem;
+        }
+        .text-block ul {
+          list-style: none;
+          margin: 1rem 0;
+        }
+        .text-block li {
+          font-size: 1rem;
+          line-height: 1.5;
+          margin-bottom: 0.5rem;
           padding-left: 1.5rem;
           position: relative;
         }
         .text-block li::before {
-          content: "•";
-          color: #7fbf7f;
-          font-size: 1.6rem;
+          content: "▹";
+          color: #4ade80;
           position: absolute;
           left: 0;
-          top: -0.1rem;
         }
-
         .learn-more {
           display: inline-block;
-          margin-top: 0.5rem;
-          font-size: 1.2rem;
+          font-size: 1.1rem;
           font-weight: 600;
-          color: #b8d9b8;
+          color: #bef264;
           text-decoration: none;
-          border-bottom: 2px solid #7f9f7f;
-          align-self: flex-start;
-          transition: all 0.2s ease;
-          pointer-events: auto;
+          border-bottom: 2px solid #4ade80;
+          transition: all 0.2s;
         }
         .learn-more:hover {
           color: #e2ffe2;
-          border-bottom-color: #c8ffc8;
+          border-bottom-color: #bef264;
           transform: translateX(4px);
         }
 
-        /* Position each block and center vertically relative to its container */
+        /* Positioning text blocks relative to containers */
         .text-block.initial-text {
-          right: calc(30% + 100px);
+          right: calc(30% + 180px);
           top: 7%;
           transform: translateY(-50%);
         }
         .text-block.second-text {
-          left: calc(10% + 180px);
-          top: 21%;
+          left: calc(10% + 200px);
+          top: 20%;
           transform: translateY(-50%);
         }
         .text-block.third-text {
-          right: calc(10% + 180px);
-          top: 36%;
+          right: calc(10% + 200px);
+          top: 35%;
           transform: translateY(-50%);
         }
         .text-block.fourth-text {
-          left: calc(20% + 180px);
-          top: 46%;
+          left: calc(20% + 200px);
+          top: 45%;
           transform: translateY(-50%);
         }
         .text-block.fifth-text {
-          right: calc(40% - 150px);
-          top: 61%;
+          right: calc(30% + 180px);
+          top: 60%;
           transform: translateY(-50%);
         }
         .text-block.sixth-text {
-          left: calc(15% + 180px);
-          top: 76%;
+          left: calc(15% + 200px);
+          top: 75%;
           transform: translateY(-50%);
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 1000px) {
-          .text-block {
-            width: 340px;
-            padding: 1.4rem 1.6rem;
-          }
-          .text-block h3 { font-size: 1.5rem; }
-          .text-block-img { width: 55px; height: 55px; }
-          .text-block li { font-size: 1rem; }
+        @media (max-width: 1200px) {
+          .text-block { width: 440px; }
+          .text-block.initial-text { right: calc(30% + 130px); }
+          .text-block.second-text { left: calc(10% + 150px); }
+          .text-block.third-text { right: calc(10% + 150px); }
+          .text-block.fourth-text { left: calc(20% + 150px); }
+          .text-block.fifth-text { right: calc(30% + 130px); }
+          .text-block.sixth-text { left: calc(15% + 150px); }
         }
-
-        @media (max-width: 700px) {
-          .text-block {
-            width: 280px;
-            padding: 1.2rem;
-          }
+        @media (max-width: 900px) {
+          .text-block { width: 360px; padding: 1.2rem; }
+          .text-block h3 { font-size: 1.4rem; }
+          .text-block-img { width: 50px; height: 50px; }
+          .text-block.initial-text { right: calc(30% + 90px); top: 8%; }
+          .text-block.second-text { left: calc(10% + 110px); top: 21%; }
+          .text-block.third-text { right: calc(10% + 110px); top: 36%; }
+          .text-block.fourth-text { left: calc(20% + 110px); top: 46%; }
+          .text-block.fifth-text { right: calc(30% + 90px); top: 61%; }
+          .text-block.sixth-text { left: calc(15% + 110px); top: 76%; }
         }
-
-        @media (max-width: 500px) {
-          .text-block {
-            width: 240px;
-          }
+        @media (max-width: 600px) {
+          .container { width: 100px; height: 100px; }
+          .marker { width: 60px; height: 60px; }
+          .dot { width: 12px; height: 12px; }
+          .text-block { width: 280px; right: auto !important; left: 5% !important; top: auto !important; transform: none; margin-top: 1rem; position: relative; display: block; }
+          .scroll-motion-root .main { height: auto; display: flex; flex-direction: column; gap: 2rem; padding: 2rem 1rem; }
+          .container { position: relative !important; left: auto !important; right: auto !important; top: auto !important; margin: 0 auto; }
+          .text-block { position: relative !important; width: 90%; margin: 1rem auto; }
+          #overlay, .dot { display: none; }
+        }
+        .custom-title {
+          position: absolute;
+          top: 3%;
+          left: 5%;
+          color: white;
+          font-size: 3.5rem;
+          z-index: 20;
+          text-shadow: 0 0 20px rgba(0,0,0,0.5);
+          font-weight: 700;
+          letter-spacing: -0.02em;
         }
       `}</style>
 
       <div className="scroll-motion-root">
         <div className="main" ref={mainRef}>
           <svg id="overlay" ref={overlayRef} xmlns="http://www.w3.org/2000/svg">
-            <path id="motionPath" ref={motionPathRef} stroke="none" fill="none" />
+            <path id="motionPath" ref={motionPathRef} />
           </svg>
 
-          <div className="box" ref={boxRef} />
+          <div className="dot" ref={dotRef} />
 
-          {/* The path-defining containers */}
+          {/* Container markers */}
           <div className="container initial" />
           <div className="container second"><div className="marker" /></div>
           <div className="container third"><div className="marker" /></div>
@@ -379,15 +383,13 @@ const ScrollMotionPath = () => {
           <div className="container fifth"><div className="marker" /></div>
           <div className="container sixth"><div className="marker" /></div>
 
-          {/* Block 1: Yuni-Buddy */}
+          {/* Text blocks */}
           <div className="text-block initial-text">
             <div className="text-block-header">
               <img className="text-block-img" src="https://picsum.photos/seed/yuni-buddy/100/100" alt="Yuni-Buddy" />
               <h3>Yuni-Buddy (Parwaaz-e-Uqabi)</h3>
             </div>
-            <p>
-              Connect, earn, and grow globally. A community platform for opportunities, jobs, internships, leadership, and global networking.
-            </p>
+            <p>Connect, earn, and grow globally. A community platform for opportunities, jobs, internships, leadership, and global networking.</p>
             <ul>
               <li>Global connectivity & earning opportunities</li>
               <li>Jobs / internships</li>
@@ -397,15 +399,12 @@ const ScrollMotionPath = () => {
             <a href="#" className="learn-more">Learn more →</a>
           </div>
 
-          {/* Block 2: Yuni-Courses */}
           <div className="text-block second-text">
             <div className="text-block-header">
               <img className="text-block-img" src="https://picsum.photos/seed/yuni-courses/100/100" alt="Yuni-Courses" />
               <h3>Yuni-Courses (Umeed-e-Sahar)</h3>
             </div>
-            <p>
-              Practical, project-based courses taught by industry leaders. Build real skills, portfolios, and secure job-ready verification.
-            </p>
+            <p>Practical, project-based courses taught by industry leaders. Build real skills, portfolios, and secure job-ready verification.</p>
             <ul>
               <li>Taught by CEOs, COOs, founders</li>
               <li>Project-based with hands-on experience</li>
@@ -415,15 +414,12 @@ const ScrollMotionPath = () => {
             <a href="#" className="learn-more">Learn more →</a>
           </div>
 
-          {/* Block 3: Yuni-Coworking */}
           <div className="text-block third-text">
             <div className="text-block-header">
               <img className="text-block-img" src="https://picsum.photos/seed/yuni-coworking/100/100" alt="Yuni-Coworking" />
               <h3>Yuni-Coworking (Yuni-Anjuman)</h3>
             </div>
-            <p>
-              Collaborative workspaces for innovators, freelancers, and startups. A community-driven environment to create and grow.
-            </p>
+            <p>Collaborative workspaces for innovators, freelancers, and startups. A community-driven environment to create and grow.</p>
             <ul>
               <li>Flexible workspaces with global vibe</li>
               <li>Networking & mentorship for startups</li>
@@ -433,15 +429,12 @@ const ScrollMotionPath = () => {
             <a href="#" className="learn-more">Learn more →</a>
           </div>
 
-          {/* Block 4: Yuni-Tech & Marketing */}
           <div className="text-block fourth-text">
             <div className="text-block-header">
               <img className="text-block-img" src="https://picsum.photos/seed/yuni-tech/100/100" alt="Yuni-Tech & Marketing" />
               <h3>Yuni-Tech & Marketing (Taqat-e-Parwaaz)</h3>
             </div>
-            <p>
-              Digital agency boosting Pakistan's online presence. AI, automation, e-commerce, and innovative marketing for global reach.
-            </p>
+            <p>Digital agency boosting Pakistan's online presence. AI, automation, e-commerce, and innovative marketing for global reach.</p>
             <ul>
               <li>Web development & digital branding</li>
               <li>AI & automation services</li>
@@ -451,15 +444,12 @@ const ScrollMotionPath = () => {
             <a href="#" className="learn-more">Learn more →</a>
           </div>
 
-          {/* Block 5: Business Consultation */}
           <div className="text-block fifth-text">
             <div className="text-block-header">
               <img className="text-block-img" src="https://picsum.photos/seed/business-consult/100/100" alt="Business Consultation" />
               <h3>Business Consultation (Momin-e-Sana'at)</h3>
             </div>
-            <p>
-              Strategic guidance for entrepreneurs and businesses. Turn ideas into sustainable, ethical, and profitable ventures.
-            </p>
+            <p>Strategic guidance for entrepreneurs and businesses. Turn ideas into sustainable, ethical, and profitable ventures.</p>
             <ul>
               <li>Startup mentorship & business planning</li>
               <li>Market entry & growth strategies</li>
@@ -469,24 +459,15 @@ const ScrollMotionPath = () => {
             <a href="#" className="learn-more">Learn more →</a>
           </div>
 
-          {/* Block 6: Completion (kept as is from original, but you can replace if needed) */}
           <div className="text-block sixth-text">
             <div className="text-block-header">
               <img className="text-block-img" src="https://picsum.photos/seed/completion/100/100" alt="Completion" />
               <h3>Completion</h3>
             </div>
-            <p>
-              The final steps are both sweet and bittersweet. We look back at the winding path, the ups and downs, the moments of doubt and triumph. 
-              What once seemed like an endless odyssey now feels like a precious, fleeting chapter. The work is done—not perfectly, perhaps, but 
-              authentically. We've left a mark, however small, on the world and on ourselves. There's a sense of peace and pride, mixed with the 
-              quiet sadness of an ending. But every ending is also a beginning. The lessons learned, the connections made, the person we've become—these 
-              are the true treasures. We take a final look at the path behind us, then turn to face the horizon ahead. The next journey is already 
-              calling, and we're ready. This isn't goodbye; it's just the closing of one door and the opening of countless others.
-            </p>
+            <p>The final steps are both sweet and bittersweet. We look back at the winding path, the ups and downs, the moments of doubt and triumph. What once seemed like an endless odyssey now feels like a precious, fleeting chapter. The work is done—not perfectly, perhaps, but authentically. We've left a mark, however small, on the world and on ourselves. There's a sense of peace and pride, mixed with the quiet sadness of an ending. But every ending is also a beginning. The lessons learned, the connections made, the person we've become—these are the true treasures. We take a final look at the path behind us, then turn to face the horizon ahead. The next journey is already calling, and we're ready. This isn't goodbye; it's just the closing of one door and the opening of countless others.</p>
             <a href="#" className="learn-more">Learn more →</a>
           </div>
 
-          {/* Custom global text */}
           <h1 className="custom-title">Our Services</h1>
         </div>
       </div>

@@ -7,9 +7,39 @@ export default function Footer() {
           z-index: 20;
           background-color: #0a0a0a;
           border-top: 1px solid rgba(153, 213, 162, 0.1);
+          overflow: hidden;
         }
 
+        /* Animated dot pattern overlay */
+        .footer::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background-image: radial-gradient(
+            circle at center,
+            rgba(153, 213, 162, 0.2) 1.5px,
+            transparent 1.5px
+          );
+          background-size: 30px 30px;
+          background-repeat: repeat;
+          animation: floatDots 20s linear infinite;
+          z-index: 0;
+        }
+
+        @keyframes floatDots {
+          0% {
+            background-position: 0 0;
+          }
+          100% {
+            background-position: 60px 60px;
+          }
+        }
+
+        /* Ensure all content sits above the pseudo-element */
         .footer-container {
+          position: relative;
+          z-index: 1;
           padding: 4rem 1.5rem;
         }
 
