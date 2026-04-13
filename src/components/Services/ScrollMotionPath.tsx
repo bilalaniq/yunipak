@@ -199,7 +199,7 @@ const ScrollMotionPath = () => {
         .scroll-motion-root .dot {
           width: 16px;
           height: 16px;
-          z-index: 20;
+          z-index: 0;
           border-radius: 50%;
           background: #4ade80;
           box-shadow: 0 0 12px #22c55e, 0 0 20px rgba(34, 197, 94, 0.8);
