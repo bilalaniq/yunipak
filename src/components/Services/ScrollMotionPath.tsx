@@ -63,7 +63,6 @@ const ScrollMotionPath = () => {
         height: mainRect.height,
       });
 
-      // Animate the green line (stroke-dashoffset)
       const pathLength = motionPath.getTotalLength();
       motionPath.style.strokeDasharray = pathLength.toString();
       motionPath.style.strokeDashoffset = pathLength.toString(); // start invisible
@@ -75,33 +74,26 @@ const ScrollMotionPath = () => {
         y: startPoint.y - dotSize / 2,
       });
 
-      // Main timeline for dot movement and line drawing
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containers[0],
-          start: 'top center',
-          endTrigger: containers[containers.length - 1],
-          end: 'bottom center',
-          scrub: 1.2,
-          invalidateOnRefresh: true,
-          scroller: window,
-          onUpdate: (self) => {
-            // Draw line exactly up to the current progress
-            const progress = self.progress;
-            const offset = pathLength * (1 - progress);
-            motionPath.style.strokeDashoffset = offset.toString();
-          },
-        },
-      });
-
-      tl.to(dot, {
-        duration: 1,
-        ease: 'none',
-        motionPath: {
-          path: motionPath,
-          align: motionPath,
-          alignOrigin: [0.5, 0.5],
-          autoRotate: false,
+      // Create scroll-triggered animation that updates line and dot position in perfect sync
+      ScrollTrigger.create({
+        trigger: containers[0],
+        start: 'top center',
+        endTrigger: containers[containers.length - 1],
+        end: 'bottom center',
+        scrub: 1.2,
+        invalidateOnRefresh: true,
+        scroller: window,
+        onUpdate: (self) => {
+          const progress = self.progress;
+          // Update line: draw exactly up to current progress (no transition lag)
+          const offset = pathLength * (1 - progress);
+          motionPath.style.strokeDashoffset = offset.toString();
+          
+          // Update dot position exactly at the end of the drawn line
+          const pointAtProgress = motionPath.getPointAtLength(pathLength * progress);
+          if (pointAtProgress) {
+            dot.style.transform = `translate(${pointAtProgress.x - dotSize / 2}px, ${pointAtProgress.y - dotSize / 2}px)`;
+          }
         },
       });
     }, mainRef);
@@ -174,7 +166,7 @@ const ScrollMotionPath = () => {
           stroke-width: 4;
           fill: none;
           filter: drop-shadow(0 0 6px #22c55e);
-          transition: stroke-dashoffset 0.05s linear;
+          /* No transition - instant update to avoid lag */
         }
         .scroll-motion-root .container {
           background: rgba(255, 255, 255, 0.1);
