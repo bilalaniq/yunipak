@@ -20,17 +20,17 @@ const Mathutils = {
   },
 };
 
+const TUBE_END_PROGRESS = 0.96; // end of cylinder path
+
 const Experience3D: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scrollTargetRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollPromptRef = useRef<HTMLDivElement>(null);
-  const blurOverlayRef = useRef<HTMLDivElement>(null); // NEW: reference for blur overlay
+  const blurOverlayRef = useRef<HTMLDivElement>(null);
 
-  // Refs for simple text sections
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Three.js refs
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const cameraGroupRef = useRef<THREE.Group | null>(null);
@@ -116,6 +116,8 @@ const Experience3D: React.FC = () => {
       bumpMap: bumpMap,
       bumpScale: -0.03,
       specular: 0x0b2349,
+      transparent: true,
+      opacity: 1,
     });
     const tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
     scene.add(tube);
@@ -141,6 +143,7 @@ const Experience3D: React.FC = () => {
       map: spikeyTexture,
       transparent: true,
       blending: THREE.AdditiveBlending,
+      opacity: 1,
     });
 
     const createParticleSystem = (range: { x: number; y: number; z: number }) => {
@@ -161,26 +164,73 @@ const Experience3D: React.FC = () => {
     scene.add(sys1, sys2, sys3);
     particleSystemsRef.current = [sys1, sys2, sys3];
 
-    const updateCameraPercentage = (percentage: number) => {
+    const updateCameraAndScene = (rawProgress: number) => {
       if (!pathRef.current || !cameraGroupRef.current || !lightRef.current) return;
-      const p1 = pathRef.current.getPointAt(percentage);
-      const p2 = pathRef.current.getPointAt(Math.min(percentage + 0.03, 1));
-      cameraGroupRef.current.position.set(p1.x, p1.y, p1.z);
-      cameraGroupRef.current.lookAt(p2);
-      lightRef.current.position.set(p2.x, p2.y, p2.z);
+
+      const tubeEnd = TUBE_END_PROGRESS;
+
+      if (rawProgress <= tubeEnd) {
+        // Inside the tube
+        const p = rawProgress;
+        const p1 = pathRef.current.getPointAt(p);
+        const p2 = pathRef.current.getPointAt(Math.min(p + 0.03, 1));
+        cameraGroupRef.current.position.set(p1.x, p1.y, p1.z);
+        cameraGroupRef.current.lookAt(p2);
+        lightRef.current.position.set(p2.x, p2.y, p2.z);
+
+        // Fade objects back to full opacity if they were faded
+        const fade = 1;
+        if (tubeRef.current) (tubeRef.current.material as THREE.MeshPhongMaterial).opacity = fade;
+        if (wireframeRef.current) (wireframeRef.current.material as THREE.LineBasicMaterial).opacity = 0.2 * fade;
+        particleSystemsRef.current.forEach(sys => {
+          (sys.material as THREE.PointsMaterial).opacity = fade;
+        });
+        lightRef.current.intensity = 0.35 * fade;
+      } else {
+        // Beyond the tube – zoom into the void
+        const extra = (rawProgress - tubeEnd) / (1 - tubeEnd); // 0→1
+
+        // Get final position and tangent at the end of the tube
+        const endPos = pathRef.current.getPointAt(1);
+        const tangent = pathRef.current.getTangent(1).normalize();
+
+        // Move camera forward along tangent
+        const zoomDistance = 30 * extra; // how far to push into the darkness
+        const newPos = endPos.clone().add(tangent.multiplyScalar(zoomDistance));
+
+        cameraGroupRef.current.position.copy(newPos);
+        // Look further ahead
+        const lookAhead = newPos.clone().add(tangent.clone().multiplyScalar(10));
+        cameraGroupRef.current.lookAt(lookAhead);
+        lightRef.current.position.copy(lookAhead);
+
+        // Fade out all 3D objects
+        const fade = Math.max(0, 1 - extra * 1.5); // fade out faster
+        if (tubeRef.current) (tubeRef.current.material as THREE.MeshPhongMaterial).opacity = fade;
+        if (wireframeRef.current) (wireframeRef.current.material as THREE.LineBasicMaterial).opacity = 0.2 * fade;
+        particleSystemsRef.current.forEach(sys => {
+          (sys.material as THREE.PointsMaterial).opacity = fade;
+        });
+        lightRef.current.intensity = 0.35 * fade;
+
+        // Shrink fog to increase darkness (type‑safe check)
+        if (scene.fog && scene.fog instanceof THREE.Fog) {
+          scene.fog.far = 100 - extra * 80;
+        }
+      }
     };
 
-    // Update text, scroll prompt, and blur overlay opacity based on scroll progress
-    const updateUI = (progress: number) => {
-      const p = progress / 0.96; // normalize 0..1
+    const updateUI = (rawProgress: number) => {
+      const normalized = rawProgress / TUBE_END_PROGRESS; // 0..1 during tube phase
 
-      // Fade out scroll prompt quickly
+      // Scroll prompt fades out quickly
       if (scrollPromptRef.current) {
-        const opacityValue = p < 0.05 ? 1 - p / 0.05 : 0;
+        const opacityValue = rawProgress < 0.05 ? 1 - rawProgress / 0.05 : 0;
         scrollPromptRef.current.style.opacity = String(opacityValue);
-        scrollPromptRef.current.style.pointerEvents = p < 0.05 ? 'auto' : 'none';
+        scrollPromptRef.current.style.pointerEvents = rawProgress < 0.05 ? 'auto' : 'none';
       }
 
+      // Existing 5 sections (only relevant during tube phase)
       const sections = [
         { el: sectionRefs.current[0], in: [0.00, 0.05], out: [0.12, 0.18] },
         { el: sectionRefs.current[1], in: [0.18, 0.24], out: [0.32, 0.38] },
@@ -193,6 +243,7 @@ const Experience3D: React.FC = () => {
       sections.forEach(({ el, in: [in0, in1], out: [out0, out1] }) => {
         if (!el) return;
         let opacity = 0;
+        const p = normalized; // use normalized for these ranges
         if (p >= in0 && p < in1) opacity = (p - in0) / (in1 - in0);
         else if (p >= in1 && p < out0) opacity = 1;
         else if (p >= out0 && p < out1) opacity = 1 - (p - out0) / (out1 - out0);
@@ -201,7 +252,21 @@ const Experience3D: React.FC = () => {
         if (opacity > maxTextOpacity) maxTextOpacity = opacity;
       });
 
-      // Apply blur overlay opacity based on max text opacity
+      // Final "beyond the tube" section (index 5)
+      const finalSection = sectionRefs.current[5];
+      if (finalSection) {
+        const extra = (rawProgress - TUBE_END_PROGRESS) / (1 - TUBE_END_PROGRESS); // 0→1
+        // Fade in after tube ends
+        let opacity = 0;
+        if (rawProgress >= TUBE_END_PROGRESS) {
+          opacity = Math.min(1, extra * 2); // quick fade in
+        }
+        finalSection.style.opacity = String(opacity);
+        finalSection.style.pointerEvents = 'none';
+        if (opacity > maxTextOpacity) maxTextOpacity = opacity;
+      }
+
+      // Update blur overlay based on max text opacity
       if (blurOverlayRef.current) {
         blurOverlayRef.current.style.opacity = String(maxTextOpacity);
         blurOverlayRef.current.style.pointerEvents = 'none';
@@ -214,7 +279,7 @@ const Experience3D: React.FC = () => {
       end: 'bottom 100%',
       scrub: false,
       onUpdate: (self) => {
-        const rawProgress = self.progress * 0.96;
+        const rawProgress = self.progress; // 0 to 1
         cameraTargetPercent.current = rawProgress;
         updateUI(rawProgress);
       },
@@ -222,7 +287,7 @@ const Experience3D: React.FC = () => {
 
     const handleScroll = () => {
       if (scrollTriggerRef.current) {
-        const progress = scrollTriggerRef.current.progress * 0.96;
+        const progress = scrollTriggerRef.current.progress;
         cameraTargetPercent.current = progress;
         updateUI(progress);
       }
@@ -249,7 +314,7 @@ const Experience3D: React.FC = () => {
 
     const animate = () => {
       cameraCurrentPercent.current += (cameraTargetPercent.current - cameraCurrentPercent.current) * 0.08;
-      updateCameraPercentage(cameraCurrentPercent.current);
+      updateCameraAndScene(cameraCurrentPercent.current);
 
       if (cameraRef.current) {
         cameraRef.current.rotation.y += (cameraRotationProxy.current.x - cameraRef.current.rotation.y) / 15;
@@ -293,66 +358,78 @@ const Experience3D: React.FC = () => {
     };
   }, []);
 
-  // Enhanced text container style with glassmorphism
+  // --- Professional Card Styles (Enhanced) ---
   const textContainerStyle: React.CSSProperties = {
     position: 'fixed',
     left: '50%',
     top: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 'min(90vw, 800px)',
+    width: 'min(92vw, 860px)',
+    maxHeight: '85vh',
+    overflowY: 'auto',
     color: '#ffffff',
     fontFamily: "'Montserrat', 'Segoe UI', sans-serif",
-    textAlign: 'center',
+    textAlign: 'left',
     zIndex: 20,
     opacity: 0,
-    transition: 'opacity 0.25s ease-out',
+    transition: 'opacity 0.3s cubic-bezier(0.2, 0.9, 0.4, 1)',
     pointerEvents: 'none',
-    padding: '2.5rem 2rem',
-    borderRadius: '24px',
-    background: 'rgba(10, 25, 20, 0.25)',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
-    border: '1px solid rgba(255, 255, 255, 0.15)',
-    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) inset',
+    padding: '2.8rem 3rem',
+    borderRadius: '32px',
+    background: 'rgba(8, 20, 16, 0.35)',
+    backdropFilter: 'blur(16px) saturate(180%)',
+    WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+    border: '1px solid rgba(200, 230, 200, 0.18)',
+    boxShadow: `
+      0 25px 50px -12px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(150, 220, 150, 0.1) inset,
+      0 8px 20px rgba(0, 0, 0, 0.2) inset
+    `,
+    scrollbarWidth: 'thin',
+    scrollbarColor: 'rgba(180, 240, 180, 0.5) rgba(0, 0, 0, 0.2)',
   };
 
   const headingStyle: React.CSSProperties = {
-    fontSize: 'clamp(2.8rem, 8vw, 5rem)',
+    fontSize: 'clamp(2.5rem, 7vw, 4.5rem)',
     fontWeight: 800,
-    marginBottom: '1.2rem',
+    marginBottom: '0.8rem',
     letterSpacing: '-0.02em',
     lineHeight: 1.1,
     textTransform: 'uppercase',
-    background: 'linear-gradient(135deg, #ffffff 0%, #e0f0e0 100%)',
+    background: 'linear-gradient(135deg, #ffffff 0%, #d4f0d4 100%)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
-    textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+    textShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+    borderBottom: '2px solid rgba(180, 240, 180, 0.25)',
+    paddingBottom: '0.6rem',
   };
 
   const subheadingStyle: React.CSSProperties = {
-    fontSize: 'clamp(1.4rem, 4vw, 2rem)',
+    fontSize: 'clamp(1.2rem, 3.5vw, 1.8rem)',
     fontWeight: 500,
     marginBottom: '2rem',
-    letterSpacing: '0.1em',
-    opacity: 0.95,
-    color: '#d0e8d0',
+    letterSpacing: '0.12em',
+    opacity: 0.9,
+    color: '#c8e8c8',
+    textTransform: 'uppercase',
+    textShadow: '0 2px 8px rgba(0,0,0,0.2)',
   };
 
   const paragraphStyle: React.CSSProperties = {
-    fontSize: 'clamp(1.1rem, 3.5vw, 1.4rem)',
+    fontSize: 'clamp(1rem, 3vw, 1.25rem)',
     lineHeight: 1.7,
     fontWeight: 400,
     marginBottom: '1.2rem',
-    textShadow: '0 2px 5px rgba(0,0,0,0.2)',
+    textShadow: '0 2px 6px rgba(0,0,0,0.25)',
+    color: '#f0f8f0',
   };
 
   const strongStyle: React.CSSProperties = {
     fontWeight: 700,
-    color: '#b8f0b8',
-    textShadow: '0 0 8px rgba(100,255,100,0.3)',
+    color: '#b0f0b0',
+    textShadow: '0 0 10px rgba(100,255,120,0.3)',
   };
 
-  // Scroll prompt style (unchanged)
   const scrollPromptStyle: React.CSSProperties = {
     position: 'fixed',
     bottom: '30px',
@@ -375,18 +452,17 @@ const Experience3D: React.FC = () => {
     gap: '8px',
   };
 
-  // Blur overlay style
   const blurOverlayStyle: React.CSSProperties = {
     position: 'fixed',
     top: 0,
     left: 0,
     width: '100%',
     height: '100vh',
-    zIndex: 15, // between canvas (2) and text (20)
+    zIndex: 15,
     pointerEvents: 'none',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    backgroundColor: 'rgba(0, 10, 5, 0.2)',
+    backdropFilter: 'blur(18px)',
+    WebkitBackdropFilter: 'blur(18px)',
+    backgroundColor: 'rgba(0, 10, 5, 0.25)',
     opacity: 0,
     transition: 'opacity 0.4s ease-out',
   };
@@ -407,15 +483,24 @@ const Experience3D: React.FC = () => {
         .scroll-arrow {
           animation: bounce 2s infinite;
         }
+        .text-card::-webkit-scrollbar {
+          width: 5px;
+        }
+        .text-card::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.15);
+          border-radius: 10px;
+        }
+        .text-card::-webkit-scrollbar-thumb {
+          background: rgba(180, 240, 180, 0.5);
+          border-radius: 10px;
+        }
       `}</style>
 
       <canvas ref={canvasRef} className="experience" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh', zIndex: 2 }} />
       <div ref={scrollTargetRef} className="scrollTarget" style={{ position: 'absolute', height: '1000vh', width: '100%', top: 0, zIndex: 0, pointerEvents: 'none' }} />
 
-      {/* Blur overlay – becomes visible when any text section is active */}
       <div ref={blurOverlayRef} style={blurOverlayStyle} />
 
-      {/* Scroll Down Prompt */}
       <div ref={scrollPromptRef} style={scrollPromptStyle}>
         <span>Scroll Down</span>
         <svg className="scroll-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.5))' }}>
@@ -423,8 +508,8 @@ const Experience3D: React.FC = () => {
         </svg>
       </div>
 
-      {/* Section 1 – Introduction */}
-      <div ref={(el) => { sectionRefs.current[0] = el; }} style={textContainerStyle}>
+      {/* Existing Sections (unchanged content) */}
+      <div ref={(el) => { sectionRefs.current[0] = el; }} style={textContainerStyle} className="text-card">
         <h1 style={headingStyle}>Yuni Pakistan</h1>
         <div style={subheadingStyle}>Re‑Building The 21st Century Shaheen 🦅</div>
         <p style={paragraphStyle}>
@@ -437,8 +522,7 @@ const Experience3D: React.FC = () => {
         </p>
       </div>
 
-      {/* Section 2 – Core Ideology */}
-      <div ref={(el) => { sectionRefs.current[1] = el; }} style={textContainerStyle}>
+      <div ref={(el) => { sectionRefs.current[1] = el; }} style={textContainerStyle} className="text-card">
         <h2 style={headingStyle}>Our Ideology</h2>
         <p style={paragraphStyle}>
           <span style={strongStyle}>Khudi (Self‑Realization)</span> — Every young Pakistani carries untapped 
@@ -458,8 +542,7 @@ const Experience3D: React.FC = () => {
         </p>
       </div>
 
-      {/* Section 3 – Products Overview */}
-      <div ref={(el) => { sectionRefs.current[2] = el; }} style={textContainerStyle}>
+      <div ref={(el) => { sectionRefs.current[2] = el; }} style={textContainerStyle} className="text-card">
         <h2 style={headingStyle}>The Yuni Ecosystem</h2>
         <p style={paragraphStyle}>
           <span style={strongStyle}>Yuni-Buddy</span> (Parwaaz‑e‑Uqabi) — Connectivity, earning opportunities, jobs, and global access.
@@ -478,8 +561,7 @@ const Experience3D: React.FC = () => {
         </p>
       </div>
 
-      {/* Section 4 – Yuni Buddy & Courses Deep Dive */}
-      <div ref={(el) => { sectionRefs.current[3] = el; }} style={textContainerStyle}>
+      <div ref={(el) => { sectionRefs.current[3] = el; }} style={textContainerStyle} className="text-card">
         <h2 style={headingStyle}>Yuni-Buddy & Yuni-Courses</h2>
         <p style={paragraphStyle}>
           <span style={strongStyle}>Parwaaz‑e‑Uqabi</span> — "Sitaron se aage jahan aur bhi hain"<br/>
@@ -491,8 +573,7 @@ const Experience3D: React.FC = () => {
         </p>
       </div>
 
-      {/* Section 5 – Tech, Marketing & Coworking */}
-      <div ref={(el) => { sectionRefs.current[4] = el; }} style={textContainerStyle}>
+      <div ref={(el) => { sectionRefs.current[4] = el; }} style={textContainerStyle} className="text-card">
         <h2 style={headingStyle}>Taqat‑e‑Parwaaz & Yuni‑Anjuman</h2>
         <p style={paragraphStyle}>
           <span style={strongStyle}>Yuni-Tech & Marketing</span> — Boosting Pakistan's digital presence with AI, 
@@ -504,6 +585,35 @@ const Experience3D: React.FC = () => {
         </p>
         <p style={{ ...paragraphStyle, marginTop: '2rem', fontStyle: 'italic' }}>
           "Yaqeen Muhkam, Amal Paiham, Mohabbat Fateh‑e‑Alam"
+        </p>
+      </div>
+
+      {/* NEW: Final Section – Appears after the tube ends */}
+      <div ref={(el) => { sectionRefs.current[5] = el; }} style={textContainerStyle} className="text-card">
+        <h2 style={headingStyle}>The Journey Continues</h2>
+        <div style={subheadingStyle}>Beyond the Horizon</div>
+        <p style={paragraphStyle}>
+          You've traversed the path of Yuni's vision. But the story doesn't end here.
+        </p>
+        <p style={paragraphStyle}>
+          The darkness you see is not emptiness—it's <span style={strongStyle}>potential</span>. 
+          It's the unwritten future of Pakistan's youth, waiting to be shaped by those who dare to dream.
+        </p>
+        <p style={paragraphStyle}>
+          <span style={strongStyle}>Join the movement.</span> Become a Shaheen. Rise with Yuni.
+        </p>
+        <p style={{ ...paragraphStyle, marginTop: '2rem', textAlign: 'center' }}>
+          <span style={{ 
+            display: 'inline-block',
+            padding: '0.8rem 2rem',
+            background: 'rgba(180, 240, 180, 0.15)',
+            border: '1px solid rgba(180, 240, 180, 0.3)',
+            borderRadius: '50px',
+            fontWeight: 600,
+            letterSpacing: '0.1em',
+          }}>
+            Coming Soon
+          </span>
         </p>
       </div>
 

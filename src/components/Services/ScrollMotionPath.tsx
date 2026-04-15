@@ -348,7 +348,7 @@ const ScrollMotionPath = () => {
         }
         .custom-title {
           position: absolute;
-          top: 3%;
+          top: 0.5%;
           left: 5%;
           color: white;
           font-size: 3.5rem;

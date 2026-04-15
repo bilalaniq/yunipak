@@ -1,5 +1,5 @@
 // src/components/HOME/Hero.tsx
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 
@@ -15,7 +15,49 @@ export default function Hero() {
   const scaleTweenRef = useRef<gsap.core.Tween | null>(null);
   const rotateTweenRef = useRef<gsap.core.Tween | null>(null);
 
+  // State to control globe visibility based on viewport width
+  const [isGlobeVisible, setIsGlobeVisible] = useState(() => window.innerWidth > 1024);
+
+  // Handle resize to show/hide globe on mobile/tablet vs desktop
   useEffect(() => {
+    const handleResize = () => {
+      const visible = window.innerWidth > 1024;
+      setIsGlobeVisible(visible);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Three.js initialization and cleanup
+  useEffect(() => {
+    if (!isGlobeVisible) {
+      // Clean up any existing Three.js resources when globe should be hidden
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+        rendererRef.current.domElement.remove();
+        rendererRef.current = null;
+      }
+      if (particlesRef.current) {
+        particlesRef.current.geometry.dispose();
+        const material = particlesRef.current.material;
+        if (Array.isArray(material)) material.forEach(mat => mat.dispose());
+        else material.dispose();
+        particlesRef.current = null;
+      }
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current);
+        animationIdRef.current = null;
+      }
+      if (mouseTweenRef.current) mouseTweenRef.current.kill();
+      if (scaleTweenRef.current) scaleTweenRef.current.kill();
+      if (rotateTweenRef.current) rotateTweenRef.current.kill();
+      sceneRef.current = null;
+      cameraRef.current = null;
+      renderingParentRef.current = null;
+      return;
+    }
+
+    // Only initialize if globe is visible and container exists
     if (!containerRef.current) return;
 
     const container = containerRef.current;
@@ -96,7 +138,9 @@ export default function Hero() {
       yoyo: true,
       ease: 'sine.inOut',
       onUpdate: () => {
-        renderingParent.scale.set(animProps.scale, animProps.scale, animProps.scale);
+        if (renderingParentRef.current) {
+          renderingParentRef.current.scale.set(animProps.scale, animProps.scale, animProps.scale);
+        }
       },
     });
 
@@ -108,30 +152,35 @@ export default function Hero() {
       yoyo: true,
       ease: 'none',
       onUpdate: () => {
-        renderingParent.rotation.set(animProps.xRot, animProps.yRot, 0);
+        if (renderingParentRef.current) {
+          renderingParentRef.current.rotation.set(animProps.xRot, animProps.yRot, 0);
+        }
       },
     });
 
     const animate = () => {
       animationIdRef.current = requestAnimationFrame(animate);
-      renderer.render(scene, camera);
+      if (rendererRef.current && sceneRef.current && cameraRef.current) {
+        rendererRef.current.render(sceneRef.current, cameraRef.current);
+      }
     };
     animate();
 
     const handleResize = () => {
-      if (!container || !renderer || !camera) return;
+      if (!container || !rendererRef.current || !cameraRef.current) return;
       const newWidth = container.clientWidth;
       const newHeight = container.clientHeight;
 
-      camera.aspect = newWidth / newHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(newWidth, newHeight);
+      cameraRef.current.aspect = newWidth / newHeight;
+      cameraRef.current.updateProjectionMatrix();
+      rendererRef.current.setSize(newWidth, newHeight);
     };
 
     window.addEventListener('resize', handleResize);
     const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(container);
 
+    // Cleanup function for this initialization
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('resize', handleResize);
@@ -145,19 +194,22 @@ export default function Hero() {
       if (rendererRef.current) {
         rendererRef.current.dispose();
         rendererRef.current.domElement.remove();
+        rendererRef.current = null;
       }
 
       if (particlesRef.current) {
         particlesRef.current.geometry.dispose();
         const material = particlesRef.current.material;
-        if (Array.isArray(material)) {
-          material.forEach((mat) => mat.dispose());
-        } else {
-          material.dispose();
-        }
+        if (Array.isArray(material)) material.forEach((mat) => mat.dispose());
+        else material.dispose();
+        particlesRef.current = null;
       }
+
+      sceneRef.current = null;
+      cameraRef.current = null;
+      renderingParentRef.current = null;
     };
-  }, []);
+  }, [isGlobeVisible]);
 
   return (
     <>
@@ -307,6 +359,13 @@ export default function Hero() {
           overflow: visible;
         }
 
+        /* On mobile/tablet, reduce min-height when globe is hidden */
+        @media (max-width: 1024px) {
+          .hero-visual {
+            min-height: 0;
+          }
+        }
+
         @media (max-width: 768px) {
           .hero {
             padding-top: 8rem;
@@ -319,7 +378,7 @@ export default function Hero() {
             font-size: 1rem;
           }
           .hero-visual {
-            min-height: 350px;
+            min-height: 0;
           }
         }
       `}</style>
@@ -328,7 +387,7 @@ export default function Hero() {
         <div className="hero-container">
           <div className="hero-grid">
             <div className="hero-content">
-              <span className="hero-label">Welcome to NASTP</span>
+              <span className="hero-label">Welcome to Yunipakistan</span>
               <h1 className="hero-title">
                 Pakistan's Premier <span>Tech Ecosystem</span>
               </h1>
@@ -342,7 +401,7 @@ export default function Hero() {
             </div>
 
             <div className="hero-visual">
-              <div className="canvas-wrapper" ref={containerRef} />
+              {isGlobeVisible && <div className="canvas-wrapper" ref={containerRef} />}
             </div>
           </div>
         </div>
