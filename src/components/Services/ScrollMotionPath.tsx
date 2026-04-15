@@ -1,4 +1,5 @@
-import { useRef, useEffect, useCallback } from 'react';
+// src/components/ScrollMotionPath.tsx
+import { useRef, useEffect, useCallback, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
@@ -11,8 +12,12 @@ const ScrollMotionPath = () => {
   const motionPathRef = useRef<SVGPathElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024);
 
   const createTimeline = useCallback(() => {
+    // Only run animation on desktop
+    if (!isDesktop) return;
+    
     if (!mainRef.current || !dotRef.current || !motionPathRef.current) return;
 
     ctxRef.current?.revert();
@@ -65,7 +70,7 @@ const ScrollMotionPath = () => {
 
       const pathLength = motionPath.getTotalLength();
       motionPath.style.strokeDasharray = pathLength.toString();
-      motionPath.style.strokeDashoffset = pathLength.toString(); // start invisible
+      motionPath.style.strokeDashoffset = pathLength.toString();
 
       // Start position of the dot
       const startPoint = relativePoints[0];
@@ -74,7 +79,7 @@ const ScrollMotionPath = () => {
         y: startPoint.y - dotSize / 2,
       });
 
-      // Create scroll-triggered animation that updates line and dot position in perfect sync
+      // Create scroll-triggered animation
       ScrollTrigger.create({
         trigger: containers[0],
         start: 'top center',
@@ -85,11 +90,9 @@ const ScrollMotionPath = () => {
         scroller: window,
         onUpdate: (self) => {
           const progress = self.progress;
-          // Update line: draw exactly up to current progress (no transition lag)
           const offset = pathLength * (1 - progress);
           motionPath.style.strokeDashoffset = offset.toString();
           
-          // Update dot position exactly at the end of the drawn line
           const pointAtProgress = motionPath.getPointAtLength(pathLength * progress);
           if (pointAtProgress) {
             dot.style.transform = `translate(${pointAtProgress.x - dotSize / 2}px, ${pointAtProgress.y - dotSize / 2}px)`;
@@ -100,34 +103,36 @@ const ScrollMotionPath = () => {
 
     ctxRef.current = ctx;
     setTimeout(() => ScrollTrigger.refresh(), 100);
-  }, []);
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      createTimeline();
-    }, 100);
-
-    const handleLoad = () => {
-      ScrollTrigger.refresh();
-      createTimeline();
-    };
-    window.addEventListener('load', handleLoad);
-
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('load', handleLoad);
-      ctxRef.current?.revert();
-      ScrollTrigger.getAll().forEach(st => st.kill());
-    };
-  }, [createTimeline]);
+  }, [isDesktop]);
 
   useEffect(() => {
     const handleResize = () => {
-      createTimeline();
+      const desktop = window.innerWidth > 1024;
+      setIsDesktop(desktop);
+      if (desktop) {
+        createTimeline();
+      }
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [createTimeline]);
+
+  useEffect(() => {
+    if (isDesktop) {
+      const timeoutId = setTimeout(createTimeline, 100);
+      const handleLoad = () => {
+        ScrollTrigger.refresh();
+        createTimeline();
+      };
+      window.addEventListener('load', handleLoad);
+      return () => {
+        clearTimeout(timeoutId);
+        window.removeEventListener('load', handleLoad);
+        ctxRef.current?.revert();
+        ScrollTrigger.getAll().forEach(st => st.kill());
+      };
+    }
+  }, [createTimeline, isDesktop]);
 
   return (
     <>
@@ -149,11 +154,13 @@ const ScrollMotionPath = () => {
           padding: 0;
           box-sizing: border-box;
         }
+
+        /* Desktop layout (unchanged) */
         .scroll-motion-root .main {
           position: relative;
           height: 700vh;
         }
-        .scroll-motion-root #overlay {
+        #overlay {
           position: absolute;
           top: 0;
           left: 0;
@@ -166,7 +173,6 @@ const ScrollMotionPath = () => {
           stroke-width: 4;
           fill: none;
           filter: drop-shadow(0 0 6px #22c55e);
-          /* No transition - instant update to avoid lag */
         }
         .scroll-motion-root .container {
           background: rgba(255, 255, 255, 0.1);
@@ -195,11 +201,10 @@ const ScrollMotionPath = () => {
         .scroll-motion-root .fifth { left: 70%; top: 60%; }
         .scroll-motion-root .sixth { left: 15%; top: 75%; }
 
-        /* Green dot styling - at the end of the line */
         .scroll-motion-root .dot {
           width: 16px;
           height: 16px;
-          z-index: 0;
+          z-index: 6;
           border-radius: 50%;
           background: #4ade80;
           box-shadow: 0 0 12px #22c55e, 0 0 20px rgba(34, 197, 94, 0.8);
@@ -209,7 +214,6 @@ const ScrollMotionPath = () => {
           left: 0;
         }
 
-        /* Text blocks - aligned with containers */
         .text-block {
           position: absolute;
           width: 560px;
@@ -284,7 +288,7 @@ const ScrollMotionPath = () => {
           transform: translateX(4px);
         }
 
-        /* Positioning text blocks relative to containers */
+        /* Desktop text block positions */
         .text-block.initial-text {
           right: calc(30% + 180px);
           top: 7%;
@@ -316,36 +320,6 @@ const ScrollMotionPath = () => {
           transform: translateY(-50%);
         }
 
-        @media (max-width: 1200px) {
-          .text-block { width: 440px; }
-          .text-block.initial-text { right: calc(30% + 130px); }
-          .text-block.second-text { left: calc(10% + 150px); }
-          .text-block.third-text { right: calc(10% + 150px); }
-          .text-block.fourth-text { left: calc(20% + 150px); }
-          .text-block.fifth-text { right: calc(30% + 130px); }
-          .text-block.sixth-text { left: calc(15% + 150px); }
-        }
-        @media (max-width: 900px) {
-          .text-block { width: 360px; padding: 1.2rem; }
-          .text-block h3 { font-size: 1.4rem; }
-          .text-block-img { width: 50px; height: 50px; }
-          .text-block.initial-text { right: calc(30% + 90px); top: 8%; }
-          .text-block.second-text { left: calc(10% + 110px); top: 21%; }
-          .text-block.third-text { right: calc(10% + 110px); top: 36%; }
-          .text-block.fourth-text { left: calc(20% + 110px); top: 46%; }
-          .text-block.fifth-text { right: calc(30% + 90px); top: 61%; }
-          .text-block.sixth-text { left: calc(15% + 110px); top: 76%; }
-        }
-        @media (max-width: 600px) {
-          .container { width: 100px; height: 100px; }
-          .marker { width: 60px; height: 60px; }
-          .dot { width: 12px; height: 12px; }
-          .text-block { width: 280px; right: auto !important; left: 5% !important; top: auto !important; transform: none; margin-top: 1rem; position: relative; display: block; }
-          .scroll-motion-root .main { height: auto; display: flex; flex-direction: column; gap: 2rem; padding: 2rem 1rem; }
-          .container { position: relative !important; left: auto !important; right: auto !important; top: auto !important; margin: 0 auto; }
-          .text-block { position: relative !important; width: 90%; margin: 1rem auto; }
-          #overlay, .dot { display: none; }
-        }
         .custom-title {
           position: absolute;
           top: 0.5%;
@@ -357,25 +331,88 @@ const ScrollMotionPath = () => {
           font-weight: 700;
           letter-spacing: -0.02em;
         }
+
+        /* ---------- Mobile & Tablet Layout (≤ 1024px) ---------- */
+        @media (max-width: 1024px) {
+          .scroll-motion-root .main {
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 5rem 1.5rem;
+            gap: 2.5rem;
+          }
+          /* Hide animation elements */
+          #overlay,
+          .dot,
+          .container {
+            display: none !important;
+          }
+          /* Convert text blocks into clean cards */
+          .text-block {
+            position: relative !important;
+            top: auto !important;
+            right: auto !important;
+            left: auto !important;
+            bottom: auto !important;
+            transform: none !important;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            border-radius: 24px;
+            border-left: none;
+            border-top: 4px solid #4ade80;
+            background: rgba(20, 30, 25, 0.9);
+            backdrop-filter: blur(16px);
+            padding: 2rem;
+          }
+          .custom-title {
+            position: relative;
+            top: 0;
+            left: 0;
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 3rem;
+          }
+        }
+
+        /* Fine-tune for smaller phones */
+        @media (max-width: 600px) {
+          .scroll-motion-root .main {
+            padding: 3rem 1rem;
+          }
+          .text-block {
+            padding: 1.5rem;
+          }
+          .text-block h3 {
+            font-size: 1.5rem;
+          }
+          .text-block p {
+            font-size: 1rem;
+          }
+          .custom-title {
+            font-size: 2.5rem;
+          }
+        }
       `}</style>
 
       <div className="scroll-motion-root">
         <div className="main" ref={mainRef}>
-          <svg id="overlay" ref={overlayRef} xmlns="http://www.w3.org/2000/svg">
-            <path id="motionPath" ref={motionPathRef} />
-          </svg>
+          {isDesktop && (
+            <>
+              <svg id="overlay" ref={overlayRef} xmlns="http://www.w3.org/2000/svg">
+                <path id="motionPath" ref={motionPathRef} />
+              </svg>
+              <div className="dot" ref={dotRef} />
+              <div className="container initial" />
+              <div className="container second"><div className="marker" /></div>
+              <div className="container third"><div className="marker" /></div>
+              <div className="container fourth"><div className="marker" /></div>
+              <div className="container fifth"><div className="marker" /></div>
+              <div className="container sixth"><div className="marker" /></div>
+            </>
+          )}
 
-          <div className="dot" ref={dotRef} />
-
-          {/* Container markers */}
-          <div className="container initial" />
-          <div className="container second"><div className="marker" /></div>
-          <div className="container third"><div className="marker" /></div>
-          <div className="container fourth"><div className="marker" /></div>
-          <div className="container fifth"><div className="marker" /></div>
-          <div className="container sixth"><div className="marker" /></div>
-
-          {/* Text blocks */}
+          {/* Text blocks – same content for both layouts, but styling adapts via CSS */}
           <div className="text-block initial-text">
             <div className="text-block-header">
               <img className="text-block-img" src="https://picsum.photos/seed/yuni-buddy/100/100" alt="Yuni-Buddy" />
