@@ -9,6 +9,7 @@ import Services from './pages/Services';
 import Contact from './pages/Contact';
 import Careers from './pages/Careers';
 import Events from './pages/Events';
+import CoursesPage from './pages/Courses';
 import './styles.css';
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/courses" element={<CoursesPage />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/events" element={<Events />} />
         </Routes>
