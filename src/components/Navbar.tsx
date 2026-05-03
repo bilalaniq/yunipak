@@ -1,12 +1,18 @@
 // src/components/HalfOverlayNavbar.tsx
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import logo from '../assets/logo.png'; // Adjust the path to your actual logo file
 
 export default function HalfOverlayNavbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
+
+  // Pages where the logo should be visible
+  const logoVisiblePaths = ['/', '/courses', '/events', '/contact', '/careers'];
+  const isLogoVisible = logoVisiblePaths.includes(location.pathname);
 
   // Close menu on ESC key press
   useEffect(() => {
@@ -31,7 +37,14 @@ export default function HalfOverlayNavbar() {
 
   return (
     <>
-      {/* Hamburger button */}
+      {/* ===== LOGO (top-left) – only on allowed pages ===== */}
+      {isLogoVisible && (
+        <Link to="/" className="navbar-logo" onClick={closeMenu}>
+          <img src={logo} alt="Yuni Pakistan" />
+        </Link>
+      )}
+
+      {/* Hamburger button (top-right) */}
       <button
         className={`menu-btn ${isOpen ? 'active' : ''}`}
         onClick={toggleMenu}
@@ -63,7 +76,6 @@ export default function HalfOverlayNavbar() {
                 <li><Link to="/courses" onClick={closeMenu}>Courses</Link></li>
                 <li><Link to="/events" onClick={closeMenu}>Events</Link></li>
                 <li><Link to="/contact" onClick={closeMenu}>Contact</Link></li>
-
               </ul>
             </nav>
 
@@ -71,7 +83,6 @@ export default function HalfOverlayNavbar() {
 
             {/* Redesigned Contact & Social Section */}
             <div className="contact-social-section">
-
               {/* Email Block - Modern & Clean */}
               <div className="email-block">
                 <svg className="email-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -127,6 +138,25 @@ export default function HalfOverlayNavbar() {
       )}
 
       <style>{`
+        /* ----- Logo (top-left) ----- */
+        .navbar-logo {
+          position: absolute;
+          top: -25px;
+          left: 24px;
+          z-index: 1200;
+          display: flex;
+          align-items: center;
+          transition: opacity 0.2s ease;
+        }
+        .navbar-logo img {
+          height: 250px;
+          width: auto;
+          display: block;
+        }
+        .navbar-logo:hover {
+          opacity: 0.8;
+        }
+
         /* ----- Hamburger Menu Button (unchanged) ----- */
         .menu-btn {
           position: fixed;
@@ -260,7 +290,7 @@ export default function HalfOverlayNavbar() {
           transform: translateX(6px);
         }
 
-        /* Dividers - FIXED: removed huge margin */
+        /* Dividers */
         .drawer-divider {
           height: 1px;
           background: linear-gradient(to right, transparent, rgba(10, 228, 72, 0.4), transparent);
@@ -268,7 +298,7 @@ export default function HalfOverlayNavbar() {
           flex-shrink: 0;
         }
 
-        /* Contact & Social Section (Redesigned) */
+        /* Contact & Social Section */
         .contact-social-section {
           margin: 0 0 1rem 0;
           flex-shrink: 0;
@@ -362,7 +392,7 @@ export default function HalfOverlayNavbar() {
           transform: scale(1.05);
         }
 
-        /* Legal Section - Single line row, now properly positioned */
+        /* Legal Section */
         .legal-section {
           margin-top: auto;
           padding-top: 1rem;
@@ -406,6 +436,9 @@ export default function HalfOverlayNavbar() {
 
         /* ----- Responsive (≤ 768px) ----- */
         @media (max-width: 768px) {
+          .navbar-logo img {
+            height: 32px;
+          }
           .side-drawer {
             width: 85vw;
             padding: 1.5rem;
@@ -445,6 +478,9 @@ export default function HalfOverlayNavbar() {
 
         /* Small phones (≤ 480px) */
         @media (max-width: 480px) {
+          .navbar-logo img {
+            height: 28px;
+          }
           .side-drawer {
             width: 100vw;
             padding: 1.25rem;

@@ -435,6 +435,7 @@ const DesktopExperience: React.FC = () => {
     textTransform: 'uppercase',
     textShadow: '0 2px 8px rgba(0,0,0,0.2)',
   };
+  void subheadingStyle; // ✅ Fixes TS6133: declared but never read
 
   const paragraphStyle: React.CSSProperties = {
     fontSize: 'clamp(1rem, 3vw, 1.25rem)',
@@ -667,14 +668,14 @@ const MobileAbout: React.FC = () => {
     display: 'inline-block',
   };
 
-  const subheadingStyle: React.CSSProperties = {
-    fontSize: '1.2rem',
-    fontWeight: 600,
-    color: '#0ae448',
-    marginBottom: '1.5rem',
-    textTransform: 'uppercase',
-    letterSpacing: '0.1em',
-  };
+  // const subheadingStyle: React.CSSProperties = {
+  //   fontSize: '1.2rem',
+  //   fontWeight: 600,
+  //   color: '#0ae448',
+  //   marginBottom: '1.5rem',
+  //   textTransform: 'uppercase',
+  //   letterSpacing: '0.1em',
+  // };
 
   const paragraphStyle: React.CSSProperties = {
     fontSize: '1rem',

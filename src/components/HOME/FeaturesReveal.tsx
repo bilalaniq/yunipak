@@ -1,7 +1,9 @@
 // src/components/HOME/FeaturesReveal.tsx
-import { useEffect } from 'react'; // Removed unused useRef
+import { useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Image1 from '../../assets/1.jpeg';
+import Image2 from '../../assets/2.jpeg';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,34 +18,34 @@ interface FeatureItem {
 const featuresData: FeatureItem[] = [
   {
     id: 1,
-    image: 'https://assets.codepen.io/16327/portrait-image-14.jpg',
-    title: 'Highway Vinyl Nights',
+    image: Image1,
+    title: 'Khudi → Self-Mastery & Identity',
     description:
-      'The headlights hum along the painted lines. We twist the dial till static turns to choir. Your hand keeps time on the wheel and the night leans in. Every mile is a chorus we have not written yet.',
+      'Real change starts from within. Inspired by Iqbal’s Khudi, we help youth discover who they are, what they stand for, and what they are capable of. We don’t just teach skills – we build confidence, discipline, and clarity. A student who understands their worth stops chasing shortcuts and starts building real power.',
     align: 'left',
   },
   {
     id: 2,
-    image: 'https://assets.codepen.io/16327/portrait-image-4.jpg',
-    title: 'Last Diner on Route 9',
+    image: Image2,
+    title: 'Skills → Economic Independence',
     description:
-      'The coffee tastes like rainwater and luck. Neon flickers slow while the jukebox spins a waltz. We carve our names in steam on the window glass. Stay till sunrise and the road will wait its turn.',
+      'Degrees alone don’t build nations – skills do. Yuni focuses on practical, income‑generating skills in tech, marketing, and freelancing. The goal is simple: turn learning into earning. When youth become economically strong, the country becomes stronger.',
     align: 'right',
   },
   {
     id: 3,
-    image: 'https://assets.codepen.io/16327/portrait-image-3.jpg',
-    title: 'Stardust Ballroom',
+    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&auto=format', // Technology
+    title: 'Technology → National Growth',
     description:
-      'Mirror tiles catch every hopeful face. Records spin thin silver threads through the dark. We move like planets pulled by quiet drums. Hold the beat and the night will never close.',
+      'The future belongs to nations that build in tech. Yuni prepares students in cybersecurity, AI, digital marketing, and development – so Pakistan doesn’t just consume technology, but creates it. From users → to builders. From followers → to innovators.',
     align: 'left',
   },
   {
     id: 4,
-    image: 'https://assets.codepen.io/16327/portrait-image-1.jpg',
-    title: 'Sky Without Borders',
+    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format', // Unity
+    title: 'Unity → Collective Power',
     description:
-      'Lay your worries down beneath the porchlight glow. The crickets stitch soft rhythm in the grass. We trade small dreams and make them loud together. A sky without borders is waiting past the trees.',
+      'No nation rises divided. Inspired by Jinnah’s principles of unity, faith, and discipline, Yuni connects youth across cities, backgrounds, and fields. Collaboration replaces competition. When the right people connect, opportunities multiply.',
     align: 'right',
   },
 ];
@@ -103,7 +105,7 @@ const FeaturesReveal = () => {
         }
 
         .content__hero {
-          height: 30vh; /* reduced from 40vh */
+          height: 30vh;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -111,7 +113,7 @@ const FeaturesReveal = () => {
 
         .content__heading {
           text-align: center;
-          font-size: 2rem; /* slightly smaller */
+          font-size: 2rem;
           font-weight: 600;
           background: linear-gradient(135deg, #0ae448, #ffffff);
           -webkit-background-clip: text;
@@ -122,7 +124,7 @@ const FeaturesReveal = () => {
         .features {
           display: flex;
           flex-direction: column;
-          gap: 1.5rem; /* reduced gap */
+          gap: 1.5rem;
         }
 
         .features__item {
@@ -130,9 +132,9 @@ const FeaturesReveal = () => {
           flex-wrap: wrap;
           align-items: center;
           gap: 1.5rem;
-          min-height: auto; /* removed full viewport height */
+          min-height: auto;
           border-top: dashed 1px rgba(10, 228, 72, 0.3);
-          padding: 2rem 0; /* reduced padding */
+          padding: 2rem 0;
         }
 
         .features__item--left {
@@ -169,7 +171,7 @@ const FeaturesReveal = () => {
         }
 
         .features__title {
-          font-size: 1.5rem; /* smaller title */
+          font-size: 1.5rem;
           margin-bottom: 0.75rem;
           font-weight: 600;
           color: #0ae448;
@@ -177,7 +179,7 @@ const FeaturesReveal = () => {
 
         .features__description {
           line-height: 1.5;
-          font-size: 1rem; /* smaller description */
+          font-size: 1rem;
           color: #dddddd;
         }
 
@@ -188,7 +190,7 @@ const FeaturesReveal = () => {
         }
 
         .spacer {
-          height: 5vh; /* reduced spacer */
+          height: 5vh;
         }
 
         @media (max-width: 768px) {
@@ -215,7 +217,7 @@ const FeaturesReveal = () => {
       <div className="content">
         <div className="content__hero">
           <h1 className="content__heading gs_reveal">
-            Reveal animations based on scroll direction
+            Yuni’s Four Pillars
           </h1>
         </div>
 
