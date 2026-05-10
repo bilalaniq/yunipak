@@ -581,13 +581,11 @@ const Careers: React.FC = () => {
       </div>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
         .careers-section {
           min-height: 100vh;
-          background: #000000;
-          font-family: 'Inter', sans-serif;
-          color: #ffffff;
+          background: var(--bg-primary);
+          font-family: 'Space Grotesk', system-ui, sans-serif;
+          color: var(--text-primary);
           padding-top: 10rem;
           padding-bottom: 8rem;
         }
@@ -600,7 +598,7 @@ const Careers: React.FC = () => {
         }
 
         .careers-heading {
-          font-family: 'Inter', sans-serif;
+          font-family: 'Space Grotesk', system-ui, sans-serif;
           font-size: 3rem;
           font-weight: 900;
           text-transform: uppercase;
@@ -616,11 +614,11 @@ const Careers: React.FC = () => {
         }
 
         .careers-heading-highlight {
-          color: #0ae448;
+          color: var(--pk-green);
         }
 
         .careers-subtitle {
-          color: #6b7280;
+          color: var(--text-secondary);
           margin-bottom: 4rem;
           font-size: 1.125rem;
           line-height: 1.75rem;
@@ -634,7 +632,7 @@ const Careers: React.FC = () => {
         }
 
         .position-panel {
-          background: rgba(20, 20, 20, 0.75);
+          background: var(--glass-bg);
           backdrop-filter: blur(12px);
           border-radius: 1.5rem;
           padding: 2rem;
@@ -642,8 +640,8 @@ const Careers: React.FC = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          border: 1px solid rgba(10, 228, 72, 0.15);
-          transition: all 0.3s ease;
+          border: 1px solid var(--glass-border);
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @media (max-width: 768px) {
@@ -661,8 +659,8 @@ const Careers: React.FC = () => {
 
         .position-panel:hover {
           transform: translateY(-4px);
-          border-color: rgba(10, 228, 72, 0.4);
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(10, 228, 72, 0.1);
+          border-color: var(--pk-green);
+          box-shadow: 0 12px 40px rgba(17, 140, 79, 0.15);
         }
 
         .position-info {
@@ -671,37 +669,40 @@ const Careers: React.FC = () => {
         }
 
         .position-title {
-          font-weight: 700;
+          font-weight: 800;
           font-size: 1.5rem;
           margin-bottom: 0.5rem;
-          color: #ffffff;
+          color: var(--text-primary);
         }
 
         .position-description {
-          color: #6b7280;
+          color: var(--text-secondary);
           font-size: 0.875rem;
-          line-height: 1.5;
+          line-height: 1.6;
         }
 
         .apply-button {
-          background: #0ae448;
-          color: #000000;
-          font-weight: 700;
-          padding: 0.625rem 1.5rem;
+          background: var(--pk-green);
+          color: #ffffff;
+          font-weight: 800;
+          padding: 0.75rem 2rem;
           border-radius: 9999px;
           border: none;
           font-size: 0.875rem;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.3s ease;
           font-family: inherit;
           white-space: nowrap;
           flex-shrink: 0;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          box-shadow: 0 4px 15px var(--pk-green-glow);
         }
 
         .apply-button:hover {
-          background: #ffffff;
-          transform: scale(1.05);
-          box-shadow: 0 4px 16px rgba(10, 228, 72, 0.4);
+          background: var(--pk-green-light);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px var(--pk-green-glow);
         }
 
         /* Modal Styles */
@@ -711,7 +712,7 @@ const Careers: React.FC = () => {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.95);
+          background: rgba(0, 0, 0, 0.7);
           backdrop-filter: blur(8px);
           display: flex;
           align-items: center;
@@ -722,15 +723,16 @@ const Careers: React.FC = () => {
         }
 
         .modal-content {
-          background: #0a0a0a;
+          background: var(--bg-primary);
           border-radius: 2rem;
           max-width: 900px;
           width: 100%;
           max-height: 90vh;
           overflow-y: auto;
           position: relative;
-          border: 1px solid rgba(10, 228, 72, 0.3);
-          padding: 2rem;
+          border: 1px solid var(--border-light);
+          padding: 2.5rem;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
         }
 
         @media (max-width: 768px) {
@@ -746,7 +748,7 @@ const Careers: React.FC = () => {
           font-size: 2rem;
           background: none;
           border: none;
-          color: #9ca3af;
+          color: var(--text-secondary);
           cursor: pointer;
           font-weight: bold;
           transition: color 0.2s;
@@ -754,14 +756,14 @@ const Careers: React.FC = () => {
         }
 
         .modal-close:hover {
-          color: #0ae448;
+          color: var(--pk-green);
         }
 
         .form-title {
           font-size: 1.75rem;
-          font-weight: 700;
-          margin-bottom: 1.5rem;
-          color: #0ae448;
+          font-weight: 800;
+          margin-bottom: 2rem;
+          color: var(--text-primary);
           text-align: center;
           clear: both;
         }
@@ -771,46 +773,48 @@ const Careers: React.FC = () => {
           border-radius: 0.75rem;
           margin-bottom: 1.5rem;
           text-align: center;
+          font-weight: 600;
         }
 
         .status-message.success {
-          background: rgba(10, 228, 72, 0.2);
-          border: 1px solid #0ae448;
-          color: #0ae448;
+          background: rgba(17, 140, 79, 0.1);
+          border: 1px solid var(--pk-green);
+          color: var(--pk-green);
         }
 
         .status-message.error {
-          background: rgba(255, 68, 68, 0.2);
-          border: 1px solid #ff4444;
-          color: #ff4444;
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid #ef4444;
+          color: #ef4444;
         }
 
         .application-form {
           display: flex;
           flex-direction: column;
-          gap: 2rem;
+          gap: 2.5rem;
         }
 
         .form-section {
-          background: rgba(20, 20, 20, 0.5);
-          border-radius: 1rem;
-          padding: 1.5rem;
-          border: 1px solid rgba(10, 228, 72, 0.1);
+          background: var(--bg-secondary);
+          border-radius: 1.25rem;
+          padding: 2rem;
+          border: 1px solid var(--border-light);
         }
 
         .form-section h3 {
           font-size: 1.25rem;
-          font-weight: 600;
-          margin-bottom: 1rem;
-          color: #0ae448;
-          border-bottom: 1px solid rgba(10, 228, 72, 0.2);
-          padding-bottom: 0.5rem;
+          font-weight: 700;
+          margin-bottom: 1.5rem;
+          color: var(--pk-green);
+          border-bottom: 1px solid var(--border-light);
+          padding-bottom: 0.75rem;
+          text-transform: uppercase;
         }
 
         .form-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 1rem;
+          gap: 1.5rem;
         }
 
         @media (min-width: 768px) {
@@ -837,58 +841,61 @@ const Careers: React.FC = () => {
 
         .form-field label {
           font-size: 0.875rem;
-          font-weight: 500;
-          color: #d1d5db;
+          font-weight: 600;
+          color: var(--text-secondary);
         }
 
         .form-field input,
         .form-field select,
         .form-field textarea {
-          background: #1a1a1a;
-          border: 1px solid #333;
-          border-radius: 0.5rem;
-          padding: 0.625rem;
-          color: #ffffff;
+          background: var(--bg-tertiary);
+          border: 1.5px solid var(--border-light);
+          border-radius: 0.75rem;
+          padding: 0.75rem 1rem;
+          color: var(--text-primary);
           font-family: inherit;
-          font-size: 0.875rem;
-          transition: all 0.2s;
+          font-size: 1rem;
+          transition: all 0.3s;
         }
 
         .form-field input:focus,
         .form-field select:focus,
         .form-field textarea:focus {
           outline: none;
-          border-color: #0ae448;
-          box-shadow: 0 0 0 2px rgba(10, 228, 72, 0.2);
+          border-color: var(--pk-green);
+          box-shadow: 0 0 0 3px rgba(17, 140, 79, 0.15);
+          background: var(--bg-primary);
         }
 
         .form-field input::placeholder,
         .form-field textarea::placeholder {
-          color: #6b7280;
+          color: var(--text-tertiary);
         }
 
         .declaration {
-          padding: 1rem;
-          background: rgba(10, 228, 72, 0.05);
-          border-radius: 0.5rem;
+          padding: 1.5rem;
+          background: rgba(17, 140, 79, 0.05);
+          border-radius: 1rem;
+          border: 1px solid rgba(17, 140, 79, 0.2);
         }
 
         .declaration label {
           display: flex;
           align-items: flex-start;
-          gap: 0.75rem;
+          gap: 1rem;
           cursor: pointer;
-          color: #d1d5db;
-          font-size: 0.875rem;
-          line-height: 1.4;
+          color: var(--text-secondary);
+          font-size: 0.95rem;
+          line-height: 1.5;
         }
 
         .declaration input[type="checkbox"] {
-          width: 1.125rem;
-          height: 1.125rem;
+          width: 1.25rem;
+          height: 1.25rem;
           cursor: pointer;
-          margin-top: 0.125rem;
+          margin-top: 0.1rem;
           flex-shrink: 0;
+          accent-color: var(--pk-green);
         }
 
         .form-actions {
@@ -899,72 +906,78 @@ const Careers: React.FC = () => {
         }
 
         .cancel-btn {
-          background: #333;
-          color: #fff;
-          border: none;
-          padding: 0.75rem 1.5rem;
-          border-radius: 0.5rem;
+          background: transparent;
+          color: var(--text-primary);
+          border: 1.5px solid var(--border-light);
+          padding: 0.875rem 2rem;
+          border-radius: 9999px;
           font-weight: 600;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.3s;
         }
 
         .cancel-btn:hover {
-          background: #444;
+          background: var(--bg-tertiary);
         }
 
         .submit-btn {
-          background: #0ae448;
-          color: #000;
+          background: var(--pk-green);
+          color: #ffffff;
           border: none;
-          padding: 0.75rem 2rem;
-          border-radius: 0.5rem;
-          font-weight: 700;
+          padding: 0.875rem 2.5rem;
+          border-radius: 9999px;
+          font-weight: 800;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.3s;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          box-shadow: 0 4px 15px var(--pk-green-glow);
         }
 
         .submit-btn:hover:not(:disabled) {
-          background: #ffffff;
+          background: var(--pk-green-light);
           transform: translateY(-2px);
+          box-shadow: 0 8px 25px var(--pk-green-glow);
         }
 
         .submit-btn:disabled {
-          opacity: 0.6;
+          opacity: 0.5;
           cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
         }
 
         .bottom-cta {
           margin-top: 4rem;
-          padding: 2.5rem;
-          background: rgba(20, 20, 20, 0.6);
-          backdrop-filter: blur(8px);
+          padding: 3rem;
+          background: var(--glass-bg);
+          backdrop-filter: blur(12px);
           border-radius: 1.5rem;
-          border: 1px solid rgba(10, 228, 72, 0.15);
+          border: 1px solid var(--glass-border);
           text-align: center;
         }
 
         .bottom-cta h2 {
-          color: #ffffff;
+          color: var(--text-primary);
           font-size: 1.75rem;
-          font-weight: 700;
-          margin-bottom: 0.75rem;
+          font-weight: 800;
+          margin-bottom: 1rem;
         }
 
         .bottom-cta p {
-          color: #9ca3af;
+          color: var(--text-secondary);
           font-size: 1.1rem;
         }
 
         .bottom-cta a {
-          color: #0ae448;
+          color: var(--pk-green);
           text-decoration: none;
-          font-weight: 600;
+          font-weight: 700;
           transition: color 0.2s ease;
         }
 
         .bottom-cta a:hover {
-          color: #ffffff;
+          color: var(--pk-green-light);
           text-decoration: underline;
         }
 
@@ -974,17 +987,17 @@ const Careers: React.FC = () => {
         }
 
         .modal-content::-webkit-scrollbar-track {
-          background: #1a1a1a;
+          background: var(--bg-secondary);
           border-radius: 4px;
         }
 
         .modal-content::-webkit-scrollbar-thumb {
-          background: #0ae448;
+          background: var(--pk-green);
           border-radius: 4px;
         }
 
         .modal-content::-webkit-scrollbar-thumb:hover {
-          background: #ffffff;
+          background: var(--pk-green-light);
         }
       `}</style>
     </section>

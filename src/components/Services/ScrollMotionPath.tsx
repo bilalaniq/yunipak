@@ -180,15 +180,15 @@ const ScrollMotionPath = () => {
         /* ---------- GLOBAL RESET & BASE ---------- */
         .scroll-motion-root {
           width: 100%;
-          background-color: #0e100f;
+          background-color: var(--bg-primary);
           background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.05) 2px, transparent 2px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.05) 2px, transparent 2px),
-            linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            linear-gradient(var(--border-light) 2px, transparent 2px),
+            linear-gradient(90deg, var(--border-light) 2px, transparent 2px),
+            linear-gradient(var(--border-light) 1px, transparent 1px),
+            linear-gradient(90deg, var(--border-light) 1px, transparent 1px);
           background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
           background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
-          color: #efe;
+          color: var(--text-primary);
           font-family: 'Inter', system-ui, sans-serif;
         }
         .scroll-motion-root * {
@@ -211,30 +211,30 @@ const ScrollMotionPath = () => {
           z-index: 5;
         }
         #motionPath {
-          stroke: #4ade80;
+          stroke: var(--pk-green);
           stroke-width: 4;
           fill: none;
-          filter: drop-shadow(0 0 8px #22c55e);
+          filter: drop-shadow(0 0 8px var(--pk-green-glow));
         }
         .scroll-motion-root .container {
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--glass-bg);
           position: absolute;
           width: 140px;
           height: 140px;
-          border: 2px dashed rgba(74, 222, 128, 0.4);
+          border: 2px dashed var(--pk-green);
           border-radius: 16px;
           display: flex;
           justify-content: center;
           align-items: center;
-          backdrop-filter: blur(4px);
+          backdrop-filter: blur(8px);
           z-index: 2;
         }
         .scroll-motion-root .marker {
           width: 80px;
           height: 80px;
           border-radius: 12px;
-          background: rgba(74, 222, 128, 0.15);
-          border: 1px solid rgba(74, 222, 128, 0.5);
+          background: rgba(17, 140, 79, 0.15);
+          border: 1px solid var(--pk-green);
         }
         .scroll-motion-root .initial { left: 70%; top: 7%; }
         .scroll-motion-root .second { left: 10%; top: 20%; }
@@ -248,8 +248,8 @@ const ScrollMotionPath = () => {
           height: 20px;
           z-index: 6;
           border-radius: 50%;
-          background: #4ade80;
-          box-shadow: 0 0 16px #22c55e, 0 0 30px rgba(34, 197, 94, 0.8);
+          background: var(--pk-green);
+          box-shadow: 0 0 16px var(--pk-green), 0 0 30px var(--pk-green-glow);
           will-change: transform;
           position: absolute;
           top: 0;
@@ -260,7 +260,7 @@ const ScrollMotionPath = () => {
           position: absolute;
           top: 0.5%;
           left: 5%;
-          color: white;
+          color: var(--text-primary);
           font-size: 3.5rem;
           z-index: 20;
           text-shadow: 0 0 20px rgba(0,0,0,0.5);
@@ -274,20 +274,20 @@ const ScrollMotionPath = () => {
           width: 420px;
           max-width: 40vw;
           padding: 1.8rem 2rem;
-          background: rgba(15, 25, 20, 0.75);
+          background: var(--glass-bg);
           backdrop-filter: blur(16px);
           border-radius: 32px;
-          border: 1px solid rgba(74, 222, 128, 0.25);
-          box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(74, 222, 128, 0.1) inset;
-          color: #efe;
+          border: 1px solid var(--border-light);
+          box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(17, 140, 79, 0.1) inset;
+          color: var(--text-primary);
           z-index: 15;
           pointer-events: auto;
           transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1), box-shadow 0.3s, border-color 0.3s;
         }
         .text-block:hover {
           transform: translateY(-6px) scale(1.01);
-          box-shadow: 0 30px 50px -16px #000, 0 0 0 1px rgba(74, 222, 128, 0.4) inset;
-          border-color: rgba(74, 222, 128, 0.5);
+          box-shadow: 0 30px 50px -16px rgba(0,0,0,0.4), 0 0 0 1px rgba(17, 140, 79, 0.4) inset;
+          border-color: var(--pk-green);
         }
 
         .text-block-header {
@@ -301,14 +301,14 @@ const ScrollMotionPath = () => {
           height: 70px;
           border-radius: 20px;
           object-fit: cover;
-          background: #1e2a25;
-          border: 2px solid rgba(74, 222, 128, 0.5);
+          background: var(--bg-tertiary);
+          border: 2px solid var(--border-light);
           box-shadow: 0 8px 12px -4px rgba(0,0,0,0.3);
         }
         .text-block h3 {
           font-size: 1.9rem;
           font-weight: 700;
-          background: linear-gradient(135deg, #bef264 0%, #a3e635 100%);
+          background: linear-gradient(135deg, var(--pk-green-light) 0%, var(--pk-green) 100%);
           -webkit-background-clip: text;
           background-clip: text;
           color: transparent;
@@ -319,14 +319,14 @@ const ScrollMotionPath = () => {
           font-size: 0.9rem;
           text-transform: uppercase;
           letter-spacing: 0.1em;
-          color: #86efac;
+          color: var(--pk-green);
           margin-top: 0.2rem;
         }
         .text-block p {
           font-size: 1.1rem;
           line-height: 1.6;
           margin-bottom: 1.4rem;
-          color: #e2e8f0;
+          color: var(--text-secondary);
         }
         .text-block ul {
           list-style: none;
@@ -338,11 +338,11 @@ const ScrollMotionPath = () => {
           margin-bottom: 0.7rem;
           padding-left: 1.8rem;
           position: relative;
-          color: #d1d5db;
+          color: var(--text-tertiary);
         }
         .text-block li::before {
           content: "✦";
-          color: #4ade80;
+          color: var(--pk-green);
           position: absolute;
           left: 0;
           font-size: 1.2rem;
@@ -353,15 +353,15 @@ const ScrollMotionPath = () => {
           gap: 0.5rem;
           font-size: 1.1rem;
           font-weight: 600;
-          color: #bef264;
+          color: var(--pk-green);
           text-decoration: none;
-          border-bottom: 2px solid #4ade80;
+          border-bottom: 2px solid var(--pk-green);
           padding-bottom: 4px;
           transition: all 0.2s;
         }
         .learn-more:hover {
-          color: #e2ffe2;
-          border-bottom-color: #bef264;
+          color: var(--pk-green-light);
+          border-bottom-color: var(--pk-green-light);
           gap: 0.8rem;
         }
 
@@ -410,13 +410,13 @@ const ScrollMotionPath = () => {
             transform: none !important;
             width: 100%;
             max-width: 600px;
-            margin: 0 0 2rem 0;
-            background: rgba(10, 20, 16, 0.85);
+            margin: 0 auto 2rem auto;
+            background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border-radius: 36px;
             padding: 2rem 1.8rem;
-            border: 1px solid rgba(74, 222, 128, 0.3);
-            box-shadow: 0 20px 30px -10px #00000080;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 30px -10px rgba(0,0,0,0.3);
           }
 
           .text-block:hover {

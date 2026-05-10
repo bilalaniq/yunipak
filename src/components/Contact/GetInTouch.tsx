@@ -2,9 +2,9 @@ import React, { useState } from "react";
 
 // Helper to generate the 25 rainbow nth-child rules (unchanged for desktop)
 const generateRainbowCSS = (): string => {
-  const black = "#000000";
-  const darkGreen = "#0a3d20";
-  const tealGreen = "#0e5a2c";
+  const black = "var(--bg-primary)";
+  const darkGreen = "var(--bg-secondary)";
+  const tealGreen = "var(--pk-green-dark)";
 
   const permutations = [
     [black, darkGreen, tealGreen],
@@ -26,11 +26,11 @@ const generateRainbowCSS = (): string => {
 
     css += `
       .rainbow:nth-child(${i}) {
-        box-shadow: -130px 0 80px 40px #0a0a0a,
+        box-shadow: -130px 0 80px 40px var(--bg-primary),
                     -50px 0 50px 25px ${colors[0]},
                     0 0 50px 25px ${colors[1]},
                     50px 0 50px 25px ${colors[2]},
-                    130px 0 80px 40px #0a0a0a;
+                    130px 0 80px 40px var(--bg-primary);
         animation: slide ${duration}s linear infinite;
         animation-delay: ${delay}s;
       }
@@ -300,8 +300,6 @@ const GetInTouch: React.FC = () => {
       </section>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
         * {
           box-sizing: border-box;
         }
@@ -315,7 +313,7 @@ const GetInTouch: React.FC = () => {
           overflow: hidden;
           z-index: 0;
           pointer-events: none;
-          background-color: #000000;
+          background-color: var(--bg-primary);
         }
 
         .rainbow {
@@ -328,7 +326,7 @@ const GetInTouch: React.FC = () => {
         }
 
         .h {
-          box-shadow: 0 0 50vh 40vh #0a0a0a;
+          box-shadow: 0 0 50vh 40vh var(--bg-primary);
           width: 100vw;
           height: 0;
           bottom: 0;
@@ -337,7 +335,7 @@ const GetInTouch: React.FC = () => {
         }
 
         .v {
-          box-shadow: 0 0 35vw 25vw #0a0a0a;
+          box-shadow: 0 0 35vw 25vw var(--bg-primary);
           width: 0;
           height: 100vh;
           bottom: 0;
@@ -350,7 +348,7 @@ const GetInTouch: React.FC = () => {
           to { right: 125vw; }
         }
 
-        ${generateRainbowCSS()}
+        \${generateRainbowCSS()}
 
         .get-in-touch {
           position: relative;
@@ -358,7 +356,7 @@ const GetInTouch: React.FC = () => {
           max-width: 1200px;
           margin: 0 auto;
           padding: 2rem 1rem;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Space Grotesk', system-ui, sans-serif;
           background: transparent;
         }
 
@@ -377,11 +375,12 @@ const GetInTouch: React.FC = () => {
 
         .page-title {
           font-size: 2rem;
-          font-weight: 700;
+          font-weight: 900;
           margin-bottom: 1.5rem;
-          color: #ffffff;
-          text-shadow: 0 0 10px rgba(0,0,0,0.5);
+          color: var(--text-primary);
+          text-shadow: 0 0 10px rgba(0,0,0,0.2);
           text-align: center;
+          text-transform: uppercase;
         }
 
         @media (min-width: 768px) {
@@ -412,12 +411,17 @@ const GetInTouch: React.FC = () => {
         }
 
         .contact-info {
-          background: rgba(20, 20, 20, 0.85);
-          backdrop-filter: blur(8px);
-          padding: 1.5rem;
-          border-radius: 1.25rem;
-          border: 1px solid rgba(10, 228, 72, 0.25);
-          transition: all 0.2s;
+          background: var(--glass-bg);
+          backdrop-filter: blur(12px);
+          padding: 2rem;
+          border-radius: 1.5rem;
+          border: 1px solid var(--glass-border);
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .contact-info:hover {
+          border-color: var(--pk-green);
+          box-shadow: 0 20px 40px rgba(17, 140, 79, 0.1);
         }
 
         .logo-wrapper {
@@ -430,7 +434,7 @@ const GetInTouch: React.FC = () => {
         .brand-name {
           font-size: 1.5rem;
           font-weight: 700;
-          color: #0ae448;
+          color: var(--pk-green);
         }
 
         .info-block {
@@ -441,19 +445,22 @@ const GetInTouch: React.FC = () => {
         }
         .info-block h2 {
           font-size: 1.1rem;
-          font-weight: 600;
+          font-weight: 700;
           margin-bottom: 0.5rem;
-          color: #ffffff;
+          color: var(--text-primary);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
         .info-block p {
-          color: #e0e0e0;
-          line-height: 1.5;
-          font-size: 0.9rem;
+          color: var(--text-secondary);
+          line-height: 1.6;
+          font-size: 0.95rem;
         }
         .info-block a {
-          color: #0ae448;
+          color: var(--pk-green);
           text-decoration: none;
           word-break: break-word;
+          font-weight: 600;
         }
         .social-icons {
           display: flex;
@@ -461,20 +468,25 @@ const GetInTouch: React.FC = () => {
           margin-top: 0.5rem;
         }
         .social-link {
-          color: #0ae448;
-          transition: color 0.15s;
+          color: var(--pk-green);
+          transition: color 0.2s;
         }
         .social-link:hover {
-          color: #ffffff;
+          color: var(--pk-green-light);
         }
 
         .contact-form {
-          background: rgba(20, 20, 20, 0.85);
-          backdrop-filter: blur(8px);
-          padding: 1.5rem;
-          border-radius: 1.25rem;
-          border: 1px solid rgba(10, 228, 72, 0.25);
-          transition: all 0.2s;
+          background: var(--glass-bg);
+          backdrop-filter: blur(12px);
+          padding: 2rem;
+          border-radius: 1.5rem;
+          border: 1px solid var(--glass-border);
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .contact-form:hover {
+          border-color: var(--pk-green);
+          box-shadow: 0 20px 40px rgba(17, 140, 79, 0.1);
         }
 
         .form-row {
@@ -499,105 +511,121 @@ const GetInTouch: React.FC = () => {
           margin-bottom: 0.5rem;
         }
         .form-group label {
-          font-weight: 500;
-          color: #ffffff;
+          font-weight: 600;
+          color: var(--text-secondary);
           font-size: 0.9rem;
         }
         .form-group input,
         .form-group textarea,
         .form-group select {
-          padding: 0.75rem 1rem;
-          border: 1px solid #444;
+          padding: 0.85rem 1rem;
+          border: 1.5px solid var(--border-light);
           border-radius: 0.75rem;
           font-family: inherit;
           font-size: 1rem;
-          background: rgba(30, 30, 30, 0.9);
-          color: #ffffff;
-          transition: border-color 0.2s, box-shadow 0.2s;
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+          transition: all 0.3s;
           -webkit-appearance: none;
           width: 100%;
         }
         .form-group select {
           cursor: pointer;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%230ae448' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23118c4f' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
           background-repeat: no-repeat;
           background-position: right 1rem center;
           padding-right: 2.5rem;
         }
         .form-group select option {
-          background: #1a1a1a;
-          color: #ffffff;
+          background: var(--bg-primary);
+          color: var(--text-primary);
         }
         .form-group input:focus,
         .form-group textarea:focus,
         .form-group select:focus {
           outline: none;
-          border-color: #0ae448;
-          box-shadow: 0 0 0 3px rgba(10, 228, 72, 0.2);
+          border-color: var(--pk-green);
+          box-shadow: 0 0 0 3px var(--pk-green-glow);
+          background: var(--bg-primary);
         }
         small {
-          color: #aaa;
-          font-size: 0.7rem;
+          color: var(--text-tertiary);
+          font-size: 0.75rem;
           margin-top: 0.25rem;
         }
         .checkbox-group {
           display: flex;
           align-items: flex-start;
-          gap: 0.75rem;
-          margin: 0.5rem 0;
+          gap: 1rem;
+          margin: 1rem 0;
         }
         .checkbox-group input {
           margin-top: 0.2rem;
-          accent-color: #0ae448;
+          accent-color: var(--pk-green);
           flex-shrink: 0;
+          width: 1.125rem;
+          height: 1.125rem;
+          cursor: pointer;
         }
         .checkbox-group label {
-          font-size: 0.85rem;
-          color: #e0e0e0;
-          line-height: 1.4;
+          font-size: 0.9rem;
+          color: var(--text-secondary);
+          line-height: 1.5;
+          cursor: pointer;
+        }
+        .checkbox-group label a {
+          color: var(--pk-green);
+          font-weight: 600;
         }
         .status-message {
-          padding: 0.75rem;
+          padding: 1rem;
           border-radius: 0.75rem;
-          font-size: 0.85rem;
+          font-size: 0.9rem;
+          font-weight: 600;
           text-align: center;
+          margin-top: 1rem;
         }
         .status-message.success {
-          background: rgba(10, 228, 72, 0.15);
-          border: 1px solid #0ae448;
-          color: #0ae448;
+          background: rgba(17, 140, 79, 0.1);
+          border: 1px solid var(--pk-green);
+          color: var(--pk-green);
         }
         .status-message.error {
-          background: rgba(255, 80, 80, 0.15);
-          border: 1px solid #ff5555;
-          color: #ff8888;
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid #ef4444;
+          color: #ef4444;
         }
         .status-message.loading {
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid #aaa;
-          color: #ddd;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid var(--border-light);
+          color: var(--text-secondary);
         }
         .submit-btn {
-          background-color: #0ae448;
-          color: #000000;
-          font-weight: 600;
-          padding: 0.85rem 1.5rem;
+          background-color: var(--pk-green);
+          color: #ffffff;
+          font-weight: 800;
+          padding: 1rem 1.5rem;
           border: none;
-          border-radius: 0.75rem;
-          font-size: 1rem;
+          border-radius: 9999px;
+          font-size: 1.05rem;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.3s;
           width: 100%;
-          margin-top: 0.5rem;
+          margin-top: 1rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          box-shadow: 0 4px 15px var(--pk-green-glow);
         }
         .submit-btn:hover:not(:disabled) {
-          background-color: #0a3d20;
-          color: #ffffff;
-          transform: translateY(-1px);
+          background-color: var(--pk-green-light);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px var(--pk-green-glow);
         }
         .submit-btn:disabled {
-          opacity: 0.6;
+          opacity: 0.5;
           cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
         }
 
         /* ---------- MOBILE PERFORMANCE OPTIMIZATIONS ---------- */
@@ -619,9 +647,9 @@ const GetInTouch: React.FC = () => {
           }
 
           .rainbow:nth-child(n) {
-            box-shadow: -50px 0 40px 20px #0a0a0a,
-                        0 0 30px 15px #0e5a2c,
-                        50px 0 40px 20px #0a0a0a !important;
+            box-shadow: -50px 0 40px 20px var(--bg-primary),
+                        0 0 30px 15px var(--pk-green),
+                        50px 0 40px 20px var(--bg-primary) !important;
           }
 
           @keyframes slide-mobile {
@@ -630,10 +658,10 @@ const GetInTouch: React.FC = () => {
           }
 
           .h {
-            box-shadow: 0 0 50vh 30vh #0a0a0a;
+            box-shadow: 0 0 50vh 30vh var(--bg-primary);
           }
           .v {
-            box-shadow: 0 0 35vw 20vw #0a0a0a;
+            box-shadow: 0 0 35vw 20vw var(--bg-primary);
           }
         }
 
@@ -643,9 +671,9 @@ const GetInTouch: React.FC = () => {
           }
 
           .rainbow:nth-child(n) {
-            box-shadow: -30px 0 30px 15px #0a0a0a,
-                        0 0 20px 10px #0e5a2c,
-                        30px 0 30px 15px #0a0a0a !important;
+            box-shadow: -30px 0 30px 15px var(--bg-primary),
+                        0 0 20px 10px var(--pk-green),
+                        30px 0 30px 15px var(--bg-primary) !important;
           }
         }
 

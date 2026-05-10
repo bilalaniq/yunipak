@@ -24,9 +24,9 @@ const TUBE_END_PROGRESS = 0.96;
 
 // Helper for mobile rainbow background (same as Events/Courses)
 const generateRainbowCSS = (): string => {
-  const black = "#000000";
-  const darkGreen = "#0a3d20";
-  const tealGreen = "#0e5a2c";
+  const black = "var(--bg-primary)";
+  const darkGreen = "var(--bg-secondary)";
+  const tealGreen = "var(--pk-green-dark)";
 
   const permutations = [
     [black, darkGreen, tealGreen],
@@ -48,11 +48,11 @@ const generateRainbowCSS = (): string => {
 
     css += `
       .rainbow-mobile:nth-child(${i}) {
-        box-shadow: -130px 0 80px 40px #0a0a0a,
+        box-shadow: -130px 0 80px 40px var(--bg-primary),
                     -50px 0 50px 25px ${colors[0]},
                     0 0 50px 25px ${colors[1]},
                     50px 0 50px 25px ${colors[2]},
-                    130px 0 80px 40px #0a0a0a;
+                    130px 0 80px 40px var(--bg-primary);
         animation: slide-mobile ${duration}s linear infinite;
         animation-delay: ${delay}s;
       }
@@ -60,6 +60,7 @@ const generateRainbowCSS = (): string => {
   }
   return css;
 };
+
 
 // ==================== DESKTOP 3D EXPERIENCE ====================
 const DesktopExperience: React.FC = () => {
@@ -94,7 +95,7 @@ const DesktopExperience: React.FC = () => {
     const wh = window.innerHeight;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x0b5330, 0, 100);
+    scene.fog = new THREE.Fog(0x118c4f, 0, 100); // Pakistan Green
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(45, ww / wh, 0.001, 200);
@@ -139,6 +140,7 @@ const DesktopExperience: React.FC = () => {
     pathRef.current = path;
 
     const tubeGeometry = new THREE.TubeGeometry(path, 300, 4, 32, false);
+    // Use a darker green texture or a techy one
     const texture = new THREE.TextureLoader().load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/68819/3d_space_5.jpg');
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(15, 2);
@@ -397,17 +399,17 @@ const DesktopExperience: React.FC = () => {
     pointerEvents: 'none',
     padding: '2.8rem 3rem',
     borderRadius: '32px',
-    background: 'rgba(8, 20, 16, 0.35)',
-    backdropFilter: 'blur(16px) saturate(180%)',
-    WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-    border: '1px solid rgba(200, 230, 200, 0.18)',
+    background: 'var(--glass-bg)',
+    backdropFilter: 'blur(20px) saturate(180%)',
+    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+    border: '1px solid var(--glass-border)',
     boxShadow: `
       0 25px 50px -12px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(150, 220, 150, 0.1) inset,
+      0 0 0 1px rgba(17, 140, 79, 0.1) inset,
       0 8px 20px rgba(0, 0, 0, 0.2) inset
     `,
     scrollbarWidth: 'thin',
-    scrollbarColor: 'rgba(180, 240, 180, 0.5) rgba(0, 0, 0, 0.2)',
+    scrollbarColor: 'var(--pk-green) var(--bg-primary)',
   };
 
   const headingStyle: React.CSSProperties = {
@@ -431,7 +433,7 @@ const DesktopExperience: React.FC = () => {
     marginBottom: '2rem',
     letterSpacing: '0.12em',
     opacity: 0.9,
-    color: '#c8e8c8',
+    color: 'var(--pk-green-light)',
     textTransform: 'uppercase',
     textShadow: '0 2px 8px rgba(0,0,0,0.2)',
   };
@@ -448,8 +450,8 @@ const DesktopExperience: React.FC = () => {
 
   const strongStyle: React.CSSProperties = {
     fontWeight: 700,
-    color: '#b0f0b0',
-    textShadow: '0 0 10px rgba(100,255,120,0.3)',
+    color: 'var(--pk-green)',
+    textShadow: '0 0 10px var(--pk-green-glow)',
   };
 
   const scrollPromptStyle: React.CSSProperties = {

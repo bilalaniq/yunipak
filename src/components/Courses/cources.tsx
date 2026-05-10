@@ -744,90 +744,90 @@ const Courses: React.FC = () => {
       {currentView === "checkout" && renderCheckoutView()}
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        .courses-app { background: #000000; min-height: 100vh; font-family: 'Inter', sans-serif; color: #ffffff; }
+        .courses-app { background: var(--bg-primary); min-height: 100vh; font-family: 'Space Grotesk', system-ui, sans-serif; color: var(--text-primary); }
         .trainings-view { padding: 8rem 1.5rem 5rem; max-width: 1280px; margin: 0 auto; }
-        .page-title { font-size: 3.5rem; font-weight: 900; letter-spacing: -0.02em; text-align: center; margin-bottom: 2rem; background: linear-gradient(135deg, #ffffff 0%, #0ae448 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .page-title { font-size: 3.5rem; font-weight: 900; letter-spacing: -0.02em; text-align: center; margin-bottom: 2rem; background: linear-gradient(135deg, var(--text-primary) 0%, var(--pk-green) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; text-transform: uppercase; }
         @media (min-width: 768px) { .page-title { font-size: 4rem; } }
         .filters-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin: 2rem 0 3rem; }
-        .filter-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); padding: 0.6rem 1.5rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.2s ease; font-family: inherit; }
-        .filter-btn:hover { border-color: #0ae448; color: #0ae448; }
-        .filter-btn.active { background: #0ae448; border-color: #0ae448; color: #000000; }
+        .filter-btn { background: var(--bg-tertiary); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.6rem 1.5rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.3s ease; font-family: inherit; }
+        .filter-btn:hover { border-color: var(--pk-green); color: var(--pk-green); }
+        .filter-btn.active { background: var(--pk-green); border-color: var(--pk-green); color: #ffffff; box-shadow: 0 4px 15px var(--pk-green-glow); }
         .course-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
         @media (min-width: 768px) { .course-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 1024px) { .course-grid { grid-template-columns: repeat(3, 1fr); } }
-        .course-card-hub { background: rgba(20,20,20,0.8); backdrop-filter: blur(8px); border-radius: 1.5rem; border: 1px solid rgba(10,228,72,0.2); overflow: hidden; transition: all 0.3s ease; }
-        .course-card-hub:hover { transform: translateY(-4px); border-color: rgba(10,228,72,0.5); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .course-card-hub { background: var(--glass-bg); backdrop-filter: blur(12px); border-radius: 1.5rem; border: 1px solid var(--glass-border); overflow: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .course-card-hub:hover { transform: translateY(-8px); border-color: var(--pk-green); box-shadow: 0 20px 40px rgba(17, 140, 79, 0.15); }
         .course-card-image { position: relative; width: 100%; height: 200px; overflow: hidden; }
-        .course-card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        .course-card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
         .course-card-hub:hover .course-card-image img { transform: scale(1.05); }
-        .cert-badge { position: absolute; top: 1rem; right: 1rem; background: #0ae448; color: #000; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; }
+        .cert-badge { position: absolute; top: 1rem; right: 1rem; background: var(--pk-green); color: #ffffff; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
         .course-card-content { padding: 1.5rem; }
-        .course-card-content h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff; }
-        .instructor { color: #0ae448; font-size: 0.875rem; margin-bottom: 0.75rem; }
-        .description { color: #aaa; font-size: 0.875rem; line-height: 1.5; margin-bottom: 1rem; }
+        .course-card-content h3 { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-primary); }
+        .instructor { color: var(--pk-green); font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .description { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; margin-bottom: 1rem; }
         .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
-        .price { font-weight: 800; font-size: 1.125rem; color: #0ae448; }
-        .view-btn { background: transparent; border: 1px solid #0ae448; color: #0ae448; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
-        .view-btn:hover { background: #0ae448; color: #000; }
+        .price { font-weight: 800; font-size: 1.125rem; color: var(--text-primary); }
+        .view-btn { background: transparent; border: 1.5px solid var(--border-light); color: var(--text-primary); padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: inherit; }
+        .view-btn:hover { border-color: var(--pk-green); color: var(--pk-green); background: rgba(17, 140, 79, 0.05); }
         .detail-view { padding: 8rem 1.5rem 5rem; max-width: 1200px; margin: 0 auto; }
-        .back-btn { background: transparent; border: none; color: rgba(255,255,255,0.6); font-weight: 700; font-size: 1rem; cursor: pointer; margin-bottom: 2rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: color 0.2s; font-family: inherit; }
-        .back-btn:hover { color: #0ae448; }
-        .detail-panel { background: rgba(20,20,20,0.6); backdrop-filter: blur(8px); border-radius: 2rem; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; display: flex; flex-direction: column; }
+        .back-btn { background: transparent; border: none; color: var(--text-secondary); font-weight: 700; font-size: 1rem; cursor: pointer; margin-bottom: 2rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: color 0.3s; font-family: inherit; }
+        .back-btn:hover { color: var(--pk-green); }
+        .detail-panel { background: var(--glass-bg); backdrop-filter: blur(12px); border-radius: 2rem; border: 1px solid var(--glass-border); overflow: hidden; display: flex; flex-direction: column; }
         @media (min-width: 768px) { .detail-panel { flex-direction: row; } }
-        .detail-left { width: 100%; padding: 2rem; background: rgba(0,0,0,0.3); border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: space-between; }
+        .detail-left { width: 100%; padding: 2rem; background: var(--bg-tertiary); border-right: 1px solid var(--border-light); display: flex; flex-direction: column; justify-content: space-between; }
         @media (min-width: 768px) { .detail-left { width: 33.333%; } .detail-right { width: 66.666%; } }
-        .detail-image { width: 100%; border-radius: 1rem; margin-bottom: 1.5rem; }
+        .detail-image { width: 100%; border-radius: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--border-light); }
         .detail-stats { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
-        .stat { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .stat-value { font-weight: 700; color: #0ae448; }
-        .stat-label { color: rgba(255,255,255,0.5); font-size: 0.875rem; }
-        .cert-notice { background: rgba(10,228,72,0.1); border: 1px solid rgba(10,228,72,0.3); padding: 0.75rem; border-radius: 0.75rem; text-align: center; font-weight: 600; color: #0ae448; }
+        .stat { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border-light); }
+        .stat-value { font-weight: 700; color: var(--text-primary); }
+        .stat-label { color: var(--text-tertiary); font-size: 0.875rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; }
+        .cert-notice { background: rgba(17, 140, 79, 0.1); border: 1px solid rgba(17, 140, 79, 0.3); padding: 1rem; border-radius: 0.75rem; text-align: center; font-weight: 700; color: var(--pk-green); }
         .detail-right { width: 100%; padding: 2rem; }
-        .detail-right h2 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
-        .instructor-detail { color: #0ae448; margin-bottom: 1rem; }
-        .description-detail { color: #ccc; line-height: 1.6; margin-bottom: 1.5rem; }
-        .detail-right h3 { font-size: 1.25rem; margin: 1.5rem 0 1rem; }
-        .learn-list { list-style: none; margin-bottom: 2rem; }
-        .learn-list li { padding: 0.5rem 0; color: #ddd; }
-        .enroll-now-btn { background: #0ae448; color: #000; border: none; padding: 0.875rem 2rem; border-radius: 9999px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.2s; font-family: inherit; }
-        .enroll-now-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(10,228,72,0.3); }
+        .detail-right h2 { font-size: 2.5rem; font-weight: 900; margin-bottom: 0.5rem; color: var(--text-primary); }
+        .instructor-detail { color: var(--pk-green); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.5rem; }
+        .description-detail { color: var(--text-secondary); line-height: 1.7; margin-bottom: 2rem; font-size: 1.1rem; }
+        .detail-right h3 { font-size: 1.5rem; margin: 1.5rem 0 1rem; color: var(--text-primary); font-weight: 800; }
+        .learn-list { list-style: none; margin-bottom: 2.5rem; }
+        .learn-list li { padding: 0.75rem 0; color: var(--text-secondary); border-bottom: 1px dashed var(--border-light); font-size: 1.05rem; }
+        .learn-list li:last-child { border-bottom: none; }
+        .enroll-now-btn { background: var(--pk-green); color: #ffffff; border: none; padding: 1rem 2.5rem; border-radius: 9999px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.3s; font-family: inherit; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 15px var(--pk-green-glow); }
+        .enroll-now-btn:hover { background: var(--pk-green-light); transform: translateY(-2px); box-shadow: 0 8px 25px var(--pk-green-glow); }
         .checkout-view { padding: 8rem 1.5rem 5rem; max-width: 1000px; margin: 0 auto; }
-        .cancel-btn { background: transparent; border: none; color: rgba(255,255,255,0.6); font-weight: 700; margin-bottom: 1.5rem; cursor: pointer; transition: color 0.2s; font-family: inherit; }
-        .cancel-btn:hover { color: #0ae448; }
-        .checkout-title { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; margin-bottom: 2rem; }
-        .status-message { padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem; text-align: center; }
-        .status-message.success { background: rgba(10,228,72,0.2); border: 1px solid #0ae448; color: #0ae448; }
-        .status-message.error { background: rgba(255,68,68,0.2); border: 1px solid #ff4444; color: #ff4444; }
+        .cancel-btn { background: transparent; border: none; color: var(--text-secondary); font-weight: 700; margin-bottom: 1.5rem; cursor: pointer; transition: color 0.3s; font-family: inherit; }
+        .cancel-btn:hover { color: var(--text-primary); }
+        .checkout-title { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; margin-bottom: 2rem; color: var(--text-primary); }
+        .status-message { padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem; text-align: center; font-weight: 600; }
+        .status-message.success { background: rgba(17, 140, 79, 0.1); border: 1px solid var(--pk-green); color: var(--pk-green); }
+        .status-message.error { background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; }
         .checkout-form-full { display: flex; flex-direction: column; gap: 2rem; }
-        .form-section { background: rgba(20,20,20,0.6); backdrop-filter: blur(8px); border-radius: 1rem; padding: 1.5rem; border: 1px solid rgba(10,228,72,0.1); }
-        .form-section h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #0ae448; border-bottom: 1px solid rgba(10,228,72,0.2); padding-bottom: 0.5rem; }
-        .bank-details-card { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        .form-section { background: var(--glass-bg); backdrop-filter: blur(12px); border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--glass-border); }
+        .form-section h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--pk-green); border-bottom: 1px solid var(--border-light); padding-bottom: 0.75rem; text-transform: uppercase; }
+        .bank-details-card { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
         @media (min-width: 768px) { .bank-details-card { grid-template-columns: 1fr 1fr; } }
-        .bank-card { background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 0.75rem; border-left: 4px solid; }
+        .bank-card { background: var(--bg-tertiary); padding: 1.5rem; border-radius: 1rem; border-left: 4px solid; border-[1px] solid var(--border-light); }
         .bank-card.meezan { border-left-color: #3b82f6; }
-        .bank-card.easypaisa { border-left-color: #22c55e; }
-        .bank-card h4 { margin-bottom: 0.75rem; font-size: 1rem; }
-        .bank-card p { font-size: 0.875rem; color: #ccc; margin-bottom: 0.5rem; }
-        .form-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        .bank-card.easypaisa { border-left-color: var(--pk-green); }
+        .bank-card h4 { margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-primary); font-weight: 700; }
+        .bank-card p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .form-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
         @media (min-width: 768px) { .form-grid { grid-template-columns: repeat(2, 1fr); } }
         .form-field { display: flex; flex-direction: column; gap: 0.5rem; }
         .form-field.full-width { grid-column: span 1; }
         @media (min-width: 768px) { .form-field.full-width { grid-column: span 2; } }
-        .form-field label { font-size: 0.875rem; font-weight: 500; color: #d1d5db; }
-        .form-field input, .form-field select, .form-field textarea { background: #1a1a1a; border: 1px solid #333; border-radius: 0.5rem; padding: 0.625rem; color: #ffffff; font-family: inherit; font-size: 0.875rem; transition: all 0.2s; }
-        .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: #0ae448; box-shadow: 0 0 0 2px rgba(10,228,72,0.2); }
-        .declaration { padding: 1rem; background: rgba(10,228,72,0.05); border-radius: 0.5rem; }
-        .declaration label { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: #d1d5db; font-size: 0.875rem; }
-        .declaration input[type="checkbox"] { width: 1.125rem; height: 1.125rem; cursor: pointer; }
-        .form-actions { display: flex; gap: 1rem; justify-content: flex-end; }
-        .cancel-reg-btn { background: #333; color: #fff; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .cancel-reg-btn:hover { background: #444; }
-        .submit-reg-btn { background: #0ae448; color: #000; border: none; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-        .submit-reg-btn:hover:not(:disabled) { background: #ffffff; transform: translateY(-2px); }
-        .submit-reg-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        @media (max-width: 768px) { .trainings-view, .detail-view, .checkout-view { padding: 6rem 1rem 3rem; } .page-title { font-size: 2rem; } .checkout-title { font-size: 1.5rem; } .detail-right h2 { font-size: 1.5rem; } }
+        .form-field label { font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); }
+        .form-field input, .form-field select, .form-field textarea { background: var(--bg-tertiary); border: 1.5px solid var(--border-light); border-radius: 0.75rem; padding: 0.75rem 1rem; color: var(--text-primary); font-family: inherit; font-size: 1rem; transition: all 0.3s; }
+        .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: var(--pk-green); box-shadow: 0 0 0 3px rgba(17, 140, 79, 0.15); background: var(--bg-primary); }
+        .declaration { padding: 1.5rem; background: rgba(17, 140, 79, 0.05); border-radius: 1rem; border: 1px solid rgba(17, 140, 79, 0.2); }
+        .declaration label { display: flex; align-items: flex-start; gap: 1rem; cursor: pointer; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; }
+        .declaration input[type="checkbox"] { width: 1.25rem; height: 1.25rem; cursor: pointer; margin-top: 0.1rem; accent-color: var(--pk-green); }
+        .form-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem; }
+        .cancel-reg-btn { background: transparent; color: var(--text-primary); border: 1.5px solid var(--border-light); padding: 0.875rem 2rem; border-radius: 9999px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .cancel-reg-btn:hover { border-color: var(--text-primary); background: var(--bg-tertiary); }
+        .submit-reg-btn { background: var(--pk-green); color: #ffffff; border: none; padding: 0.875rem 2.5rem; border-radius: 9999px; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 15px var(--pk-green-glow); }
+        .submit-reg-btn:hover:not(:disabled) { background: var(--pk-green-light); transform: translateY(-2px); box-shadow: 0 8px 25px var(--pk-green-glow); }
+        .submit-reg-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        @media (max-width: 768px) { .trainings-view, .detail-view, .checkout-view { padding: 6rem 1rem 3rem; } .page-title { font-size: 2.2rem; } .checkout-title { font-size: 1.8rem; } .detail-right h2 { font-size: 1.8rem; } }
       `}</style>
     </div>
   );

@@ -1,68 +1,122 @@
+// src/components/HOME/CTA.tsx
 import { useNavigate } from 'react-router-dom';
 
 export default function CTA() {
   const navigate = useNavigate();
 
   return (
-    <>
+    <section className="cta-tech">
       <style>{`
-        .cta {
-          padding: 5rem 1.5rem;
-          background-color: var(--bg-dark-2);
-        }
-
-        .cta-container {
-          text-align: center;
+        .cta-tech {
+          max-width: 1200px;
+          margin: 4rem auto 8rem;
           padding: 0 1.5rem;
         }
 
-        .cta-title {
-          font-size: 2.25rem;
-          font-weight: 700;
-          margin-bottom: 1.5rem;
+        .cta-box {
+          position: relative;
+          background: var(--pk-green-dark);
+          background: linear-gradient(135deg, var(--pk-green-dark) 0%, #001a0a 100%);
+          border-radius: var(--card-radius);
+          padding: 5rem 3rem;
+          overflow: hidden;
+          text-align: center;
+          color: #ffffff;
+          box-shadow: 0 40px 100px rgba(0, 143, 76, 0.2);
         }
 
-        @media (min-width: 768px) {
-          .cta-title {
-            font-size: 3rem;
-          }
+        [data-theme="light"] .cta-box {
+          background: linear-gradient(135deg, var(--pk-green) 0%, var(--pk-green-dark) 100%);
         }
 
-        .cta-description {
-          color: var(--text-gray);
-          margin-bottom: 2rem;
-          font-size: 1.125rem;
+        .cta-box::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle at center, rgba(0, 230, 118, 0.1) 0%, transparent 70%);
+          animation: ctaPulse 10s ease-in-out infinite;
         }
 
-        .cta-btn {
-          background-color: var(--primary);
-          color: var(--primary-dark);
-          padding: 1rem 3rem;
-          border-radius: 0.5rem;
-          font-weight: 600;
-          font-size: 1.125rem;
-          transition: background-color 0.3s ease;
-          cursor: pointer;
-          border: none;
-          font-family: 'Inter', sans-serif;
+        @keyframes ctaPulse {
+          0%, 100% { transform: scale(1); opacity: 0.5; }
+          50% { transform: scale(1.2); opacity: 0.8; }
         }
 
-        .cta-btn:hover {
-          background-color: var(--primary-light);
+        .cta-content {
+          position: relative;
+          z-index: 10;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2rem;
         }
+
+        .cta-title-tech {
+          font-size: clamp(2.5rem, 6vw, 4.5rem);
+          font-weight: 900;
+          line-height: 1;
+          letter-spacing: -0.05em;
+          text-transform: uppercase;
+        }
+
+        .cta-sub-tech {
+          max-width: 600px;
+          font-size: 1.1rem;
+          opacity: 0.8;
+          line-height: 1.6;
+        }
+
+        .btn-cta {
+          background: #ffffff;
+          color: var(--pk-green-dark);
+          padding: 1.2rem 3rem;
+          border-radius: 100px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          transition: all 0.4s var(--transition-smooth);
+        }
+
+        .btn-cta:hover {
+          transform: translateY(-5px) scale(1.05);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+          background: var(--pk-green-light);
+          color: #ffffff;
+        }
+
+        .cta-decor {
+          position: absolute;
+          font-family: 'Space Grotesk', sans-serif;
+          font-weight: 900;
+          font-size: 15rem;
+          opacity: 0.05;
+          pointer-events: none;
+          line-height: 1;
+          user-select: none;
+        }
+
+        .cta-decor-1 { top: -2rem; left: -2rem; }
+        .cta-decor-2 { bottom: -2rem; right: -2rem; }
       `}</style>
 
-      <section className="cta">
-        <div className="cta-container">
-          <h2 className="cta-title">Ready to Transform Your Tech?</h2>
-          <p className="cta-description">
-            Connect with our expert team and discover how we can help you achieve your technology goals.
+      <div className="cta-box">
+        <div className="cta-decor cta-decor-1">YUNI</div>
+        <div className="cta-decor cta-decor-2">2026</div>
+
+        <div className="cta-content">
+          <h2 className="cta-title-tech">The Future is <br/> <span style={{color: 'var(--pk-green-light)'}}>Coded by You.</span></h2>
+          <p className="cta-sub-tech">
+            Stop watching from the sidelines. Join Pakistan's fastest-growing 
+            technical collective and start building world-class products today.
           </p>
-          <button className="cta-btn" onClick={() => navigate('/contact')}>
-            Get In Touch
+          <button className="btn-cta" onClick={() => navigate('/contact')}>
+            Initialize Success
           </button>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }
