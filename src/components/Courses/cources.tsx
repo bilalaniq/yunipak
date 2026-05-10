@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
+import DisplayContent from '../DisplayContent';
 
 interface CourseItem {
   id: string;
@@ -580,11 +581,11 @@ const Courses: React.FC = () => {
     <div className="checkout-view">
       <div className="checkout-container">
         <button onClick={handleBackToHub} className="cancel-btn">← Cancel Registration</button>
-        <h2 className="checkout-title">Complete Registration</h2>
+        <h2 className="checkout-title"><DisplayContent id="enrollment-title" type="text" defaultValue="Complete Registration" /></h2>
         {submitStatus && <div className={`status-message ${submitStatus.type}`}>{submitStatus.message}</div>}
         <form onSubmit={handleSubmit} className="checkout-form-full">
           <div className="form-section">
-            <h3>Banking Information</h3>
+            <h3><DisplayContent id="enrollment-bank-title" type="text" defaultValue="Banking Information" /></h3>
             <div className="bank-details-card">
               <div className="bank-card meezan">
                 <h4>Meezan Bank (Recommended)</h4>
@@ -602,7 +603,7 @@ const Courses: React.FC = () => {
             </div>
           </div>
           <div className="form-section">
-            <h3>Payment Details</h3>
+            <h3><DisplayContent id="enrollment-payment-title" type="text" defaultValue="Payment Details" /></h3>
             <div className="form-grid">
               <div className="form-field">
                 <label>Payment Method *</label>
@@ -627,7 +628,7 @@ const Courses: React.FC = () => {
             </div>
           </div>
           <div className="form-section">
-            <h3>Personal Information</h3>
+            <h3><DisplayContent id="enrollment-personal-title" type="text" defaultValue="Personal Information" /></h3>
             <div className="form-grid">
               <div className="form-field"><label>Full Name (as per CNIC) *</label><input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange} required /></div>
               <div className="form-field"><label>Father's Name *</label><input type="text" name="fatherName" value={formData.fatherName} onChange={handleInputChange} required /></div>
@@ -662,7 +663,7 @@ const Courses: React.FC = () => {
             </div>
           </div>
           <div className="form-section">
-            <h3>Educational Background</h3>
+            <h3><DisplayContent id="enrollment-education-title" type="text" defaultValue="Educational Background" /></h3>
             <div className="form-grid">
               <div className="form-field">
                 <label>Highest Qualification *</label>
@@ -682,7 +683,7 @@ const Courses: React.FC = () => {
             </div>
           </div>
           <div className="form-section">
-            <h3>Professional Information</h3>
+            <h3><DisplayContent id="enrollment-professional-title" type="text" defaultValue="Professional Information" /></h3>
             <div className="form-grid">
               <div className="form-field">
                 <label>Current Employment Status</label>
@@ -701,7 +702,7 @@ const Courses: React.FC = () => {
             </div>
           </div>
           <div className="form-section">
-            <h3>Additional Information</h3>
+            <h3><DisplayContent id="enrollment-additional-title" type="text" defaultValue="Additional Information" /></h3>
             <div className="form-grid">
               <div className="form-field">
                 <label>How did you hear about us? *</label>

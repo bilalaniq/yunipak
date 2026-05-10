@@ -1,269 +1,430 @@
-// src/components/Navbar.tsx
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
-import { Menu, X, Sun, Moon, ChevronRight } from 'lucide-react';
-import gsap from 'gsap';
+'use client';
 
-const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const { theme, toggleTheme } = useTheme();
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import type { ReactElement } from 'react';
+
+interface NavbarProps {
+  onNavigate?: (page: string) => void;
+}
+
+const Navbar = ({ onNavigate }: NavbarProps): ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    // Handle scroll effect
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleNavigate = (page: string) => {
+    if (onNavigate) {
+      onNavigate(page);
+    } else {
+      // Use React Router navigation
+      let route = '';
+      switch (page) {
+        case 'home':
+          route = '/';
+          break;
+        case 'trainings':
+          route = '/courses';
+          break;
+        case 'blog':
+          route = '/events';
+          break;
+        case 'careers':
+          route = '/careers';
+          break;
+        case 'contact':
+          route = '/contact';
+          break;
+        default:
+          route = `/${page}`;
+      }
+      navigate(route);
+    }
+    setIsMobileMenuOpen(false);
+  };
+
   const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'About', path: '/Aboutus' },
-    { name: 'Programs', path: '/Programs' },
-    { name: 'Events', path: '/events' },
-    { name: 'Careers', path: '/careers' },
-    { name: 'Contact', path: '/contact' }
+    { id: 'home', label: 'Home', route: '/' },
+    { id: 'trainings', label: 'Programs', route: '/Programs' },
+    { id: 'blog', label: 'News', route: '/events' },
+    { id: 'careers', label: 'Careers', route: '/careers' },
+    { id: 'contact', label: 'Contact', route: '/contact' },
   ];
 
-  const handleNavigate = (path: string) => {
-    setIsOpen(false);
-    navigate(path);
+  // Check if a nav link is active
+  const isActive = (route: string) => {
+    if (route === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname === route;
   };
 
   return (
-    <nav className={`navbar-wrapper ${isScrolled ? 'scrolled' : ''}`}>
+    <>
       <style>{`
-        .navbar-wrapper {
+        :root {
+          --brand-400: #34d399;
+          --brand-500: #10b981;
+        }
+
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          padding-top: 80px;
+        }
+
+        /* Transparent blur effect - glass morphism */
+        .glass-panel {
+          background: rgba(255, 255, 255, 0.08);
+          backdrop-filter: blur(12px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+          box-shadow: none;
+          transition: all 0.3s ease;
+        }
+
+        /* Slightly more opaque when scrolled for better readability */
+        .glass-panel-scrolled {
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(16px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .fixed-nav {
           position: fixed;
           top: 0;
           left: 0;
-          width: 100%;
+          right: 0;
           z-index: 1000;
-          padding: 1.5rem 2rem;
-          transition: all 0.4s var(--transition-smooth);
+          width: 100%;
         }
 
-        .navbar-container {
-          max-width: 1200px;
+        .max-w-7xl {
+          max-width: 80rem;
           margin: 0 auto;
+        }
+
+        .px-6 {
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+        }
+
+        .h-20 {
+          height: 5rem;
+        }
+
+        .flex {
           display: flex;
-          align-items: center;
+        }
+
+        .justify-between {
           justify-content: space-between;
-          padding: 0.75rem 1.5rem;
-          background: var(--glass-bg);
-          backdrop-filter: blur(20px) saturate(180%);
-          border: 1px solid var(--glass-border);
-          border-radius: 100px;
-          transition: all 0.4s var(--transition-smooth);
-          box-shadow: 0 10px 40px var(--glass-shadow);
         }
 
-        .scrolled .navbar-wrapper {
-          padding: 1rem 2rem;
-        }
-
-        .scrolled .navbar-container {
-          background: var(--glass-bg-heavy);
-          padding: 0.5rem 1.5rem;
-          box-shadow: 0 20px 50px var(--glass-shadow);
-        }
-
-        .nav-logo {
-          font-family: 'Space Grotesk', sans-serif;
-          font-weight: 900;
-          font-size: 1.5rem;
-          color: var(--text-primary);
-          display: flex;
+        .items-center {
           align-items: center;
-          gap: 4px;
+        }
+
+        .font-black {
+          font-weight: 900;
+        }
+
+        .text-3xl {
+          font-size: 1.875rem;
+        }
+
+        .cursor-pointer {
           cursor: pointer;
         }
 
-        .nav-logo span {
-          color: var(--pk-green);
+        .text-brand-400 {
+          color: var(--brand-400);
         }
 
-        .nav-links {
-          display: none;
+        /* Desktop Navigation - Glass effect */
+        .desktop-nav {
+          display: flex;
+          align-items: center;
           gap: 2rem;
-        }
-
-        @media (min-width: 1024px) {
-          .nav-links {
-            display: flex;
-          }
+          background: rgba(255, 255, 255, 0.05);
+          padding: 0.5rem 2rem;
+          border-radius: 9999px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(4px);
         }
 
         .nav-link {
-          color: var(--text-secondary);
-          font-weight: 600;
-          font-size: 0.9rem;
-          transition: all 0.3s ease;
-          position: relative;
+          background: none;
+          border: none;
           cursor: pointer;
+          font-weight: 700;
+          font-size: 0.75rem;
+          letter-spacing: 0.1em;
+          padding: 0.5rem 0;
+          color: rgba(255, 255, 255, 0.7);
+          transition: all 0.2s ease;
+          text-transform: uppercase;
         }
 
-        .nav-link:hover, .nav-link.active {
-          color: var(--pk-green);
+        .nav-link:hover {
+          color: var(--brand-400);
+          transform: translateY(-1px);
         }
 
-        .nav-actions {
+        .nav-link.active {
+          color: var(--brand-400);
+          text-shadow: 0 0 8px rgba(52, 211, 153, 0.3);
+        }
+
+        /* Desktop Actions */
+        .desktop-actions {
           display: flex;
           align-items: center;
           gap: 1rem;
         }
 
-        .theme-toggle {
-          width: 40px;
-          height: 40px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          background: var(--bg-tertiary);
-          color: var(--text-primary);
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-
-        .theme-toggle:hover {
-          background: var(--pk-green-glow-subtle);
-          color: var(--pk-green);
-        }
-
-        .btn-enroll {
-          display: none;
-          padding: 0.6rem 1.5rem;
-          background: var(--pk-green);
-          color: #fff;
-          border-radius: 100px;
+        .enroll-btn {
+          background: var(--brand-500);
+          color: #000000;
+          padding: 0.625rem 1.5rem;
+          border-radius: 9999px;
           font-weight: 700;
-          font-size: 0.8rem;
-          text-transform: uppercase;
+          font-size: 0.875rem;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .enroll-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+          display: none;
+          flex-direction: column;
+          justify-content: space-between;
+          width: 30px;
+          height: 21px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+          z-index: 10;
+        }
+
+        .mobile-menu-btn span {
+          width: 100%;
+          height: 3px;
+          background-color: rgba(255, 255, 255, 0.9);
+          border-radius: 3px;
           transition: all 0.3s ease;
         }
 
-        @media (min-width: 640px) {
-          .btn-enroll {
-            display: block;
-          }
+        .mobile-menu-btn.open span:first-child {
+          transform: translateY(9px) rotate(45deg);
         }
 
-        .btn-enroll:hover {
-          background: var(--pk-green-light);
-          transform: scale(1.05);
+        .mobile-menu-btn.open span:nth-child(2) {
+          opacity: 0;
         }
 
-        .mobile-toggle {
-          display: flex;
-          color: var(--text-primary);
-          cursor: pointer;
+        .mobile-menu-btn.open span:last-child {
+          transform: translateY(-9px) rotate(-45deg);
         }
 
-        @media (min-width: 1024px) {
-          .mobile-toggle {
-            display: none;
-          }
-        }
-
-        /* Mobile Menu */
+        /* Mobile Menu with transparent blur */
         .mobile-menu {
           position: fixed;
-          top: 0;
+          top: 5rem;
           left: 0;
-          width: 100%;
-          height: 100vh;
-          background: var(--bg-primary);
-          z-index: 2000;
-          display: flex;
-          flex-direction: column;
-          padding: 2rem;
-          transform: translateX(100%);
-          transition: transform 0.5s var(--transition-smooth);
+          right: 0;
+          background: rgba(0, 0, 0, 0.6);
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          transform: translateY(-100%);
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.3s ease;
+          z-index: 999;
         }
 
         .mobile-menu.open {
-          transform: translateX(0);
+          transform: translateY(0);
+          opacity: 1;
+          visibility: visible;
+        }
+
+        .mobile-menu-inner {
+          padding: 2rem 1.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
         }
 
         .mobile-nav-link {
-          font-size: 2.5rem;
-          font-family: 'Space Grotesk', sans-serif;
-          font-weight: 800;
-          color: var(--text-primary);
-          margin-bottom: 1.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
+          padding: 0.75rem 0;
+          font-size: 1rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: rgba(255, 255, 255, 0.8);
+          transition: all 0.2s ease;
+          background: none;
+          border: none;
+          cursor: pointer;
+          text-align: left;
         }
 
-        .mobile-nav-link:hover {
-          color: var(--pk-green);
+        .mobile-nav-link:hover,
+        .mobile-nav-link.active {
+          color: var(--brand-400);
+          transform: translateX(5px);
+        }
+
+        .mobile-menu-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-enroll-btn {
+          background: var(--brand-500);
+          color: #000000;
+          padding: 0.75rem 1rem;
+          border-radius: 9999px;
+          font-weight: 700;
+          font-size: 0.875rem;
+          text-align: center;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .mobile-enroll-btn:hover {
+          transform: translateY(-2px);
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+          .desktop-nav {
+            display: none;
+          }
+          
+          .desktop-actions {
+            display: none;
+          }
+          
+          .mobile-menu-btn {
+            display: flex;
+          }
+        }
+
+        .transition-all {
+          transition: all 0.3s ease;
+        }
+
+        .hover-trigger {
+          transition: all 0.2s ease;
+        }
+
+        .hover-trigger:hover {
+          transform: scale(1.02);
         }
       `}</style>
 
-      <div className="navbar-container">
-        <div className="nav-logo" onClick={() => navigate('/')}>
-          YUNI<span>.</span>
-        </div>
+      <nav
+        id="global-nav"
+        className={`glass-panel fixed-nav transition-all ${isScrolled ? 'glass-panel-scrolled' : ''}`}
+      >
+        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+          {/* Logo */}
+          <div
+            className="font-black text-3xl cursor-pointer hover-trigger"
+            onClick={() => handleNavigate('home')}
+            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", color: 'white' }}
+          >
+            YUNI<span className="text-brand-400">.</span>
+          </div>
 
-        <div className="nav-links">
-          {navLinks.map((link) => (
-            <div 
-              key={link.path}
-              className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
-              onClick={() => handleNavigate(link.path)}
+          {/* Desktop Navigation */}
+          <div className="desktop-nav">
+            {navLinks.map((link) => (
+              <button
+                key={link.id}
+                onClick={() => handleNavigate(link.id)}
+                className={`nav-link ${isActive(link.route) ? 'active' : ''}`}
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Desktop Actions */}
+          <div className="desktop-actions">
+            <button
+              onClick={() => handleNavigate('trainings')}
+              className="enroll-btn"
             >
-              {link.name}
+              Enroll Now
+            </button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className={`mobile-menu-btn ${isMobileMenuOpen ? 'open' : ''}`}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
+          <div className="mobile-menu-inner">
+            {navLinks.map((link) => (
+              <button
+                key={link.id}
+                onClick={() => handleNavigate(link.id)}
+                className={`mobile-nav-link ${isActive(link.route) ? 'active' : ''}`}
+              >
+                {link.label}
+              </button>
+            ))}
+            <div className="mobile-menu-actions">
+              <button
+                onClick={() => handleNavigate('trainings')}
+                className="mobile-enroll-btn"
+              >
+                Enroll Now
+              </button>
             </div>
-          ))}
-        </div>
-
-        <div className="nav-actions">
-          <div className="theme-toggle" onClick={toggleTheme}>
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-          </div>
-          
-          <button className="btn-enroll" onClick={() => navigate('/Programs')}>
-            Enroll Now
-          </button>
-
-          <div className="mobile-toggle" onClick={() => setIsOpen(true)}>
-            <Menu size={24} />
           </div>
         </div>
-      </div>
-
-      {/* Mobile Menu Overlay */}
-      <div className={`mobile-menu ${isOpen ? 'open' : ''}`}>
-        <div style={{display: 'flex', justifyContent: 'flex-end', marginBottom: '4rem'}}>
-          <X size={32} onClick={() => setIsOpen(false)} style={{cursor: 'pointer'}} />
-        </div>
-        
-        {navLinks.map((link) => (
-          <div 
-            key={link.path} 
-            className="mobile-nav-link"
-            onClick={() => handleNavigate(link.path)}
-          >
-            {link.name}
-            <ChevronRight size={32} />
-          </div>
-        ))}
-
-        <div style={{marginTop: 'auto', paddingBottom: '4rem'}}>
-          <button 
-            className="btn-tech btn-tech-primary" 
-            style={{width: '100%', justifyContent: 'center'}}
-            onClick={() => handleNavigate('/Programs')}
-          >
-            Get Started
-          </button>
-        </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 };
 

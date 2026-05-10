@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import DisplayContent from '../DisplayContent';
 
 const faqs = [
   {
@@ -145,7 +146,7 @@ export default function FAQ() {
       `}</style>
 
       <div className="faq-section">
-        <h2 className="faq-title">Frequently Asked Questions</h2>
+        <h2 className="faq-title"><DisplayContent id="faq-title" type="text" defaultValue="Frequently Asked Questions" /></h2>
 
         {faqs.map((faq, index) => (
           <div key={index} className="faq-item">
@@ -153,13 +154,13 @@ export default function FAQ() {
               className="faq-question"
               onClick={() => toggle(index)}
             >
-              {faq.question}
+              <DisplayContent id={`faq-q-${index}`} type="text" defaultValue={faq.question} />
               <span className={`faq-icon ${openIndex === index ? 'open' : ''}`}>
                 +
               </span>
             </button>
             <div className={`faq-answer ${openIndex === index ? 'open' : ''}`}>
-              {faq.answer}
+              <DisplayContent id={`faq-a-${index}`} type="text" defaultValue={faq.answer} />
             </div>
           </div>
         ))}
